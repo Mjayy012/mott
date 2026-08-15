@@ -363,7 +363,7 @@
     font-family:var(--display); font-weight:600; font-size:1.25rem; color:var(--burgundy);
     margin-bottom:6px;
   }
-  .timeline-desc{ font-size:.92rem; color:var(--ink-soft); line-height:1.65; font-weight:300; }
+  .timeline-desc{ font-size:.92rem; color:var(--ink-soft); line-height:1.65; font-weight:300; white-space:pre-line; }
   .timeline-photo{
     margin-top:12px; border-radius:14px; overflow:hidden;
     box-shadow:0 12px 26px -14px rgba(91,35,51,.4);
@@ -860,7 +860,7 @@
 
       <div class="letter-paper reveal">
         <p class="letter-greeting">My love,</p>
-        <p class="letter-body" id="letter-body">[Write your personal love letter here. Talk about how this month felt, a moment that stuck with you, and what you're looking forward to. This whole paragraph is yours to rewrite — the handwritten font will make even a short note feel like a keepsake.]</p>
+        <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
         <p class="letter-sign">Always yours ❤️</p>
       </div>
     </section>
@@ -927,8 +927,8 @@
 
   // --- Our Story timeline ---
   const timelineEntries = [
-    { date: "Aug 2021", title: "The Day I saw you", desc: "It  was pandemic at that time and the settings were online class haha, it felt like love at first sight when I saw you on the screen that moment felt like I found my one and only girl that I will love forever haha ang cringe lovey, but something just snap me out like, no you can't have her haha then time goes by's and my feelings were not gone like it was continuously growing haha.", photo: "" },
-    { date: "January 2021", title: "Our First Conversation", desc: "Our first conversation was just a normal haha but it felt special for me cause I got to talk to you for the first time haha. It was just casually saying hello this is our part in the activity AHAHAHAHAH", photo: "" },
+    { date: "Aug 2021", title: "The Day I Saw You", desc: "It was during the pandemic at that time, and the setting was online class haha. It felt like love at first sight when I saw you on the screen. At that moment, I felt like I had found the one and only girl that I would love forever haha. Ang cringe, lovey. 😭 \n\nBut something just snapped me out of it, like, 'No, you can't have her.' Haha. Then time went by, and my feelings didn't go away. Instead, they just kept growing haha. \n\nI don't want to admit it, but yeah, it was just on and off, on and off HAHAHAHA.", photo: "" },
+    { date: "September 2021", title: "Our First Conversation", desc: "Our first conversation was just a normal haha but it felt special for me cause I got to talk to you for the first time haha. It was just casually saying hello this is our part in the activity AHAHAHAHAH", photo: "" },
     { date: "May 2026", title: "Our First Date", desc: "Our first date, hmmmm. for me our official date is on Zambales, it is ride date haha. And the feeling was so amazing, it felt like I am living in a dream cause I got to take you in my province. And I got my first kiss there HAHAHAH. It was the best experience ever.", photo: "" },
     { date: "May 2026", title: "A Favorite Memory", desc: "My favorite memory is when we had our first kiss. Legit! as in like I never tought that will happen HAHAHAH 'cause I am just admiring you from the start and never imagined we would be together like this.", photo: "" },
     { date: "Today", title: "Today", desc: "Another month together. Another chapter of us. I hope we continue to create beautiful memories together. Sana walang magbabago kailanman ❤️", photo: "" }
@@ -950,9 +950,7 @@
 
   // --- Videos for the video memories section ---
   const videos = [
-    { src: "videos/video1.mp4", caption: "A moment I'll always treasure. ❤️" },
-    { src: "videos/video2.mp4", caption: "Us being us." },
-    { src: "videos/video3.mp4", caption: "I could watch this forever." }
+    { src: "videos/mots.mp4", caption: "A moment I'll always treasure. ❤️" },
   ];
 
   // --- Reasons I love you ---
@@ -967,12 +965,12 @@
   ];
 
   // --- Love letter (use \n for line breaks / new paragraphs) ---
-  const loveLetter = "[Write your personal love letter here. Talk about how this month felt, a moment that stuck with you, and what you're looking forward to. This whole paragraph is yours to rewrite — the handwritten font will make even a short note feel like a keepsake.]";
+  const loveLetter = "It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. \n\n You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life.";
 
   // --- Secret surprise message ---
-  const secretMessage = "No matter how many months pass, I will always choose you.\n\nHere's to more memories, more laughter, more adventures, more silly moments, more late-night conversations, and more monthsaries together.\n\nThank you for being part of my life.\n\nI love you. ❤️";
+  const secretMessage = "No matter how many months pass, I will always choose you.\n\nHere's to more memories, more laughter, more adventures, more silly moments, more late-night conversations, and more monthsaries together. And also more staycation HAHAHAHAHAH.\n\nThank you for being part of my life.\n\nI love you and will always love you my loveyyy. ❤️";
 
-  /* ============================================================
+  /* ============================================================ 
     END OF CUSTOMIZATION BLOCK — code below makes it all work
     ============================================================ */
 
