@@ -150,6 +150,8 @@
   }
 
   let musicResumeQueued = false;
+  let queuedMusicResumeHandler = null;
+  let videoPlaybackActive = false;
 
   function setMusicPlayingState(isPlaying){
     musicControl.classList.toggle('playing', isPlaying);
@@ -195,6 +197,10 @@
 
   function playMusicSafely(){
     if(!musicEnabled) return Promise.resolve(false);
+    if(videoPlaybackActive){
+      setMusicPlayingState(false);
+      return Promise.resolve(false);
+    }
     restoreSavedMusicTime();
     sessionStorage.setItem(MUSIC_SHOULD_PLAY_KEY, 'yes');
     bgAudio.muted = false;
@@ -208,7 +214,7 @@
         return true;
       }).catch(function(){
         setMusicPlayingState(false);
-        queueMusicResume();
+        if(!videoPlaybackActive) queueMusicResume();
         return false;
       });
     }
@@ -218,18 +224,25 @@
     return Promise.resolve(true);
   }
 
+  function clearQueuedMusicResume(){
+    if(!queuedMusicResumeHandler) return;
+    document.removeEventListener('pointerdown', queuedMusicResumeHandler);
+    document.removeEventListener('touchstart', queuedMusicResumeHandler);
+    document.removeEventListener('click', queuedMusicResumeHandler);
+    document.removeEventListener('keydown', queuedMusicResumeHandler);
+    queuedMusicResumeHandler = null;
+    musicResumeQueued = false;
+  }
+
   function queueMusicResume(){
     if(musicResumeQueued || !musicEnabled) return;
     musicResumeQueued = true;
 
     const resume = function(){
-      musicResumeQueued = false;
-      document.removeEventListener('pointerdown', resume);
-      document.removeEventListener('touchstart', resume);
-      document.removeEventListener('click', resume);
-      document.removeEventListener('keydown', resume);
-      playMusicSafely();
+      clearQueuedMusicResume();
+      if(!videoPlaybackActive) playMusicSafely();
     };
+    queuedMusicResumeHandler = resume;
 
     document.addEventListener('pointerdown', resume, { once:true });
     document.addEventListener('touchstart', resume, { once:true });
@@ -245,7 +258,7 @@
       playMusicSafely();
     }
     bgAudio.addEventListener('canplay', function(){
-      if(bgAudio.paused && sessionStorage.getItem(MUSIC_SHOULD_PLAY_KEY) !== 'no') playMusicSafely();
+      if(bgAudio.paused && !videoPlaybackActive && sessionStorage.getItem(MUSIC_SHOULD_PLAY_KEY) !== 'no') playMusicSafely();
     }, { once:true });
     return;
     const p = bgAudio.play();
@@ -277,6 +290,12 @@
 
   bgAudio.addEventListener('timeupdate', function(){
     saveMusicState(!bgAudio.paused || musicPausedByVideo);
+  });
+  bgAudio.addEventListener('play', function(){
+    setMusicPlayingState(true);
+  });
+  bgAudio.addEventListener('pause', function(){
+    setMusicPlayingState(false);
   });
   window.addEventListener('pagehide', function(){
     saveMusicState(!bgAudio.paused || musicPausedByVideo);
@@ -311,15 +330,20 @@
   let musicPausedByVideo = false;
 
   function pauseMusicForVideo(){
-    if(!musicEnabled || bgAudio.paused) return;
-    musicPausedByVideo = true;
-    saveMusicState(true);
+    if(!musicEnabled) return;
+    videoPlaybackActive = true;
+    clearQueuedMusicResume();
+    const shouldResumeAfterVideo = !bgAudio.paused || sessionStorage.getItem(MUSIC_SHOULD_PLAY_KEY) === 'yes';
+    musicPausedByVideo = shouldResumeAfterVideo;
+    if(shouldResumeAfterVideo) saveMusicState(true);
     bgAudio.pause();
     setMusicPlayingState(false);
   }
 
   function resumeMusicAfterVideo(){
-    if(!musicEnabled || !musicPausedByVideo) return;
+    if(!musicEnabled) return;
+    videoPlaybackActive = false;
+    if(!musicPausedByVideo) return;
     musicPausedByVideo = false;
     playMusicSafely();
   }
@@ -530,7 +554,10 @@
       if(v.paused){
         pauseMusicForVideo();
         v.muted = false;
-        v.play().catch(function(){});
+        v.play().catch(function(){
+          videoPlaybackActive = false;
+          resumeMusicAfterVideo();
+        });
         this.textContent = '❚❚';
       } else {
         v.pause();
