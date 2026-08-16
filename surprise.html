@@ -997,7 +997,7 @@
 
   // --- Videos for the video memories section ---
   const videos = [
-    { src: "videos/Mots.mp4", caption: "A moment I'll always treasure. ❤️" },
+    { src: "videos/Mots-optimized.mp4", caption: "A moment I'll always treasure. ❤️" },
   ];
 
   // --- Reasons I love you ---
@@ -1561,7 +1561,7 @@
       vid.playsInline = true;
       vid.muted = true; // respect autoplay restrictions until user interacts
       vid.controls = false;
-      vid.preload = 'metadata';
+      vid.preload = 'auto';
       vid.addEventListener('play', pauseMusicForVideo);
       vid.addEventListener('pause', resumeMusicAfterVideo);
       vid.onerror = function(){
