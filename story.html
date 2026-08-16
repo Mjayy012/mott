@@ -1259,6 +1259,7 @@
       document.body.classList.add('story-opening');
       sessionStorage.setItem('monthsaryUnlocked', 'yes');
       sessionStorage.setItem('monthsaryAutoplayMusic', 'yes');
+      playMusicSafely();
       setTimeout(function(){
         window.location.href = 'story.html';
       }, 520);
