@@ -720,23 +720,10 @@
     const input = document.getElementById('reply-input');
     const status = document.getElementById('reply-status');
     const sentText = sentBox.querySelector('.reply-sent-text');
-    const storageKey = 'monthsary_reply_message';
     const replySourceUrl = 'replies.html';
     let pageReplyMessage = '';
 
     if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
-
-    function getStoredReply(){
-      try{ return localStorage.getItem(storageKey) || ''; }
-      catch(e){ return ''; }
-    }
-
-    function storeReply(message){
-      try{
-        localStorage.setItem(storageKey, message);
-      }
-      catch(e){}
-    }
 
     function setStatus(message, isError){
       if(!status) return;
@@ -786,8 +773,7 @@
     }
 
     function openModal(){
-      const message = pageReplyMessage || getStoredReply();
-      if(message) modalText.textContent = message;
+      modalText.textContent = pageReplyMessage || '';
       modalScene.classList.remove('opened');
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
@@ -805,7 +791,11 @@
     }
 
     loadReplyFromPage().then(function(message){
-      if(!message) return;
+      if(!message){
+        pageReplyMessage = '';
+        modalText.textContent = '';
+        return;
+      }
       pageReplyMessage = message;
       showSentState(message, 'page');
     }).catch(function(){});
@@ -814,14 +804,12 @@
       e.preventDefault();
       const message = input.value.trim();
       if(!message) return;
-      storeReply(message);
       setStatus('Saved on this device only. To show it on all devices, put it in replies.html and push it to GitHub.', true);
-      showSentState(message, 'local');
     });
 
     miniEnvelope.addEventListener('click', openModal);
     editBtn.addEventListener('click', function(){
-      showFormState(pageReplyMessage || getStoredReply());
+      showFormState(pageReplyMessage);
     });
     modalClose.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e){
