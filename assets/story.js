@@ -253,8 +253,6 @@
   }
 
   let musicPausedByVideo = false;
-  let driveMusicSilenced = false;
-  let driveMusicVolumeBeforeSilence = 0.5;
 
   function pauseMusicForVideo(){
     if(!musicEnabled || bgAudio.paused) return;
@@ -267,23 +265,6 @@
     if(!musicEnabled || !musicPausedByVideo) return;
     musicPausedByVideo = false;
     playMusicSafely();
-  }
-
-  function silenceMusicForDriveVideo(){
-    if(!musicEnabled || driveMusicSilenced || bgAudio.paused) return;
-    driveMusicSilenced = true;
-    driveMusicVolumeBeforeSilence = bgAudio.volume || parseFloat(volumeSlider.value) || 0.5;
-    fadeMusic(0, 220);
-  }
-
-  function restoreMusicAfterDriveVideo(){
-    if(!musicEnabled || !driveMusicSilenced) return;
-    driveMusicSilenced = false;
-    bgAudio.muted = false;
-    muteToggle.textContent = '🔊';
-    const targetVolume = parseFloat(volumeSlider.value) || driveMusicVolumeBeforeSilence || 0.5;
-    fadeMusic(targetVolume, 520);
-    setMusicPlayingState(!bgAudio.paused);
   }
 
   function pauseCurrentVideoForScroll(){
@@ -520,16 +501,6 @@
     if('IntersectionObserver' in window && videoSection){
       const videoScrollObserver = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          const activeVideo = videos[currentVideo] || {};
-          if(activeVideo.type === 'drive'){
-            if(entry.isIntersecting && entry.intersectionRatio >= 0.12){
-              silenceMusicForDriveVideo();
-            } else {
-              restoreMusicAfterDriveVideo();
-            }
-            return;
-          }
-
           if(!entry.isIntersecting || entry.intersectionRatio < 0.25){
             pauseCurrentVideoForScroll();
           }

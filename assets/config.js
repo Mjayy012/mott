@@ -81,9 +81,7 @@ window.MONTHSARY = {
   ],
   "videos": [
     {
-      "type": "drive",
-      "src": "https://drive.google.com/file/d/1vQ_bLI286d_0f4tniYihCIWaSm4vw_WR/preview",
-      "link": "https://drive.google.com/file/d/1vQ_bLI286d_0f4tniYihCIWaSm4vw_WR/view?usp=sharing",
+      "src": "videos/Mots-optimized.mp4",
       "caption": "A moment I'll always treasure. ❤️"
     }
   ],
