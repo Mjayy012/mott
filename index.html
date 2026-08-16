@@ -209,7 +209,8 @@
     transition:opacity 1.2s var(--ease);
   }
   #experience.revealed{ opacity:1; }
-  body.unlock-page{
+  body.unlock-page,
+  body.hero-page{
     height:100vh;
     overflow:hidden;
   }
@@ -224,6 +225,35 @@
   }
   body.experience-page #experience{
     opacity:1;
+  }
+  body.hero-page #lock-screen,
+  body.hero-page #experience > section:not(#hero),
+  body.hero-page footer,
+  body.hero-page #cine-transition,
+  body.hero-page #surprise-overlay{
+    display:none !important;
+  }
+  body.hero-page #experience,
+  body.story-page #experience{
+    opacity:1;
+  }
+  body.story-page #lock-screen,
+  body.story-page #hero{
+    display:none !important;
+  }
+  body.story-page #story{
+    animation:storySlideIn .9s var(--ease) both;
+  }
+  body.hero-page.story-opening #hero{
+    animation:heroSlideOut .65s var(--ease) both;
+  }
+  @keyframes storySlideIn{
+    from{ opacity:0; transform:translateX(-100vw); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  @keyframes heroSlideOut{
+    from{ opacity:1; transform:translateX(0); }
+    to{ opacity:0; transform:translateX(100vw); }
   }
 
   .chapter{
@@ -795,7 +825,7 @@
       <p class="hero-months" id="hero-months">— Months of Us</p>
       <p class="hero-names" id="hero-names">Name ❤️ Name</p>
       <button class="hero-btn" id="open-story-btn">Open Our Story 💕</button>
-      <div class="scroll-cue" aria-hidden="true">⟶</div>
+      <button class="scroll-cue" id="open-story-arrow" aria-label="Open our story">⟶</button>
     </section>
 
     <!-- 4. OUR STORY -->
@@ -1038,6 +1068,8 @@
   const lockWelcome = document.getElementById('lock-welcome');
   const experience = document.getElementById('experience');
   const isExperiencePage = document.body.classList.contains('experience-page');
+  const isHeroPage = document.body.classList.contains('hero-page');
+  const isStoryPage = document.body.classList.contains('story-page');
 
   pinBoxes.forEach(function(box, i){
     box.addEventListener('input', function(){
@@ -1222,9 +1254,20 @@
     quietObserver.observe(document.getElementById('quiet'));
   }
 
-  document.getElementById('open-story-btn').addEventListener('click', function(){
+  function openStoryPage(){
+    if(isHeroPage){
+      document.body.classList.add('story-opening');
+      sessionStorage.setItem('monthsaryUnlocked', 'yes');
+      setTimeout(function(){
+        window.location.href = 'story.html';
+      }, 520);
+      return;
+    }
     document.getElementById('story').scrollIntoView({ behavior:'smooth' });
-  });
+  }
+
+  document.getElementById('open-story-btn').addEventListener('click', openStoryPage);
+  document.getElementById('open-story-arrow').addEventListener('click', openStoryPage);
 
   /* ============================================================
     3. BACKGROUND MUSIC CONTROL
@@ -1590,6 +1633,13 @@
     startCounter();
   }
 
+  function startHero(){
+    experience.classList.add('revealed');
+    document.getElementById('music-control').setAttribute('aria-hidden','false');
+    document.getElementById('music-control').style.display = 'flex';
+    attemptAutoplayMusic();
+  }
+
   /* ============================================================
     9. LIVE RELATIONSHIP COUNTER
     ============================================================ */
@@ -1670,9 +1720,11 @@
     window.location.href = 'index.html';
   });
 
-  if(isExperiencePage){
+  if(isExperiencePage || isHeroPage || isStoryPage){
     if(sessionStorage.getItem('monthsaryUnlocked') !== 'yes'){
       window.location.replace('index.html');
+    } else if(isHeroPage){
+      startHero();
     } else {
       startExperience();
     }
