@@ -722,6 +722,7 @@
     const sentText = sentBox.querySelector('.reply-sent-text');
     const storageKey = 'monthsary_reply_message';
     const replySourceUrl = 'replies.html';
+    let pageReplyMessage = '';
 
     if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
 
@@ -785,7 +786,7 @@
     }
 
     function openModal(){
-      const message = getStoredReply();
+      const message = pageReplyMessage || getStoredReply();
       if(message) modalText.textContent = message;
       modalScene.classList.remove('opened');
       overlay.classList.add('show');
@@ -803,11 +804,9 @@
       modalScene.classList.add('opened');
     }
 
-    const existing = getStoredReply();
-    if(existing) showSentState(existing, 'local');
     loadReplyFromPage().then(function(message){
       if(!message) return;
-      storeReply(message);
+      pageReplyMessage = message;
       showSentState(message, 'page');
     }).catch(function(){});
 
@@ -822,7 +821,7 @@
 
     miniEnvelope.addEventListener('click', openModal);
     editBtn.addEventListener('click', function(){
-      showFormState(getStoredReply());
+      showFormState(pageReplyMessage || getStoredReply());
     });
     modalClose.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e){
