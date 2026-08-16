@@ -725,6 +725,13 @@
 
     if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
 
+    try{
+      localStorage.removeItem('monthsary_reply_message');
+      localStorage.removeItem('monthsary_reply_saved_online');
+      localStorage.removeItem('monthsary_reply_id');
+      localStorage.removeItem('monthsary_reply_edit_token');
+    }catch(e){}
+
     function setStatus(message, isError){
       if(!status) return;
       status.textContent = message || '';
@@ -736,9 +743,7 @@
       sentBox.classList.remove('hidden');
       modalText.textContent = message;
       if(sentText){
-        sentText.textContent = source === 'page'
-          ? 'Your letter is ready to open.'
-          : 'Your letter was saved on this device only.';
+        sentText.textContent = 'Your letter is ready to open.';
       }
     }
 
@@ -804,7 +809,7 @@
       e.preventDefault();
       const message = input.value.trim();
       if(!message) return;
-      setStatus('Saved on this device only. To show it on all devices, put it in replies.html and push it to GitHub.', true);
+      setStatus('This page cannot write to replies.html on GitHub Pages. Put the message in replies.html and push it to show on all devices.', true);
     });
 
     miniEnvelope.addEventListener('click', openModal);
