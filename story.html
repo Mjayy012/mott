@@ -1933,11 +1933,21 @@
     if('IntersectionObserver' in window && videoSection){
       const videoScrollObserver = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
+          const activeVideo = videos[currentVideo] || {};
+          if(activeVideo.type === 'drive'){
+            if(entry.isIntersecting && entry.intersectionRatio >= 0.12){
+              pauseMusicForVideo();
+            } else {
+              resumeMusicAfterVideo();
+            }
+            return;
+          }
+
           if(!entry.isIntersecting || entry.intersectionRatio < 0.25){
             pauseCurrentVideoForScroll();
           }
         });
-      }, { threshold:[0, 0.25] });
+      }, { threshold:[0, 0.12, 0.25, 0.5] });
       videoScrollObserver.observe(videoSection);
     }
 
