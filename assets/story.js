@@ -599,6 +599,7 @@
     document.getElementById('music-control').setAttribute('aria-hidden','false');
     document.getElementById('music-control').style.display = 'flex';
     attemptAutoplayMusic();
+    initReplyMailbox();
     initRevealObserver();
     initSlideshow();
     initVideos();
@@ -674,6 +675,84 @@
       });
       setTimeout(function(){ h.remove(); }, 2800);
     }
+  }
+
+  /* ============================================================
+    13. WRITE ME BACK
+    ============================================================ */
+  function initReplyMailbox(){
+    const form = document.getElementById('reply-form');
+    const sentBox = document.getElementById('reply-sent');
+    const miniEnvelope = document.getElementById('reply-mini-envelope');
+    const overlay = document.getElementById('reply-modal-overlay');
+    const modalClose = document.getElementById('reply-modal-close');
+    const modalEnvelope = document.getElementById('reply-modal-envelope');
+    const modalText = document.getElementById('reply-modal-text');
+    const input = document.getElementById('reply-input');
+    const storageKey = 'monthsary_reply_message';
+
+    if(!form || !sentBox || !miniEnvelope || !overlay || !modalClose || !modalEnvelope || !modalText || !input) return;
+
+    function getStoredReply(){
+      try{ return localStorage.getItem(storageKey) || ''; }
+      catch(e){ return ''; }
+    }
+
+    function storeReply(message){
+      try{ localStorage.setItem(storageKey, message); }
+      catch(e){}
+    }
+
+    function showSentState(message){
+      form.classList.add('hidden');
+      sentBox.classList.remove('hidden');
+      modalText.textContent = message;
+    }
+
+    function openModal(){
+      const message = getStoredReply();
+      if(message) modalText.textContent = message;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+      modalEnvelope.focus();
+    }
+
+    function closeModal(){
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+      modalEnvelope.classList.remove('opened');
+    }
+
+    function openLetter(){
+      modalEnvelope.classList.add('opened');
+    }
+
+    const existing = getStoredReply();
+    if(existing) showSentState(existing);
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const message = input.value.trim();
+      if(!message) return;
+      storeReply(message);
+      showSentState(message);
+    });
+
+    miniEnvelope.addEventListener('click', openModal);
+    modalClose.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) closeModal();
+    });
+    modalEnvelope.addEventListener('click', openLetter);
+    modalEnvelope.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openLetter();
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && overlay.classList.contains('show')) closeModal();
+    });
   }
 
   /* ============================================================

@@ -890,7 +890,102 @@
   }
 
   /* ============================================================
-    13. FINAL SCENE
+    13. WRITE ME BACK
+    ============================================================ */
+  #reply{
+    background:linear-gradient(180deg, var(--cream-deep), var(--blush));
+    text-align:center;
+  }
+  .reply-scene{ width:100%; max-width:620px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .reply-form{ width:100%; display:flex; flex-direction:column; gap:14px; }
+  .reply-textarea{
+    width:100%; border-radius:16px; border:1.5px solid var(--rose);
+    background:rgba(255,253,251,.82); padding:16px; font-family:var(--body);
+    font-size:.95rem; color:var(--ink); resize:vertical; outline:none;
+    min-height:160px;
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .reply-textarea:focus{ border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,166,107,.18); }
+  .reply-submit-btn{
+    align-self:center; padding:13px 30px; border-radius:999px;
+    background:linear-gradient(135deg, var(--burgundy), var(--rose-deep));
+    color:var(--white); font-size:.9rem; letter-spacing:.04em;
+    box-shadow:0 14px 30px -16px rgba(91,35,51,.45);
+    transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .reply-submit-btn:hover,
+  .reply-submit-btn:focus-visible{ transform:translateY(-2px); box-shadow:0 18px 36px -16px rgba(91,35,51,.55); }
+  .reply-sent{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .reply-sent-text{ font-family:var(--display); font-style:italic; color:var(--ink-soft); }
+  .reply-mini-envelope{
+    width:64px; height:64px; border-radius:14px;
+    background:linear-gradient(160deg,var(--blush),var(--rose));
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+    box-shadow:0 12px 26px -14px rgba(91,35,51,.4);
+    animation:pulseGlow 2.4s ease-in-out infinite;
+    transition:transform .25s var(--ease);
+  }
+  .reply-mini-envelope:hover,
+  .reply-mini-envelope:focus-visible{ transform:translateY(-3px) scale(1.05); }
+
+  #reply-modal-overlay{
+    position:fixed; inset:0; z-index:9996;
+    background:rgba(52,16,25,.82); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .6s var(--ease);
+    padding:24px;
+  }
+  #reply-modal-overlay.show{ opacity:1; pointer-events:all; }
+  .reply-modal-card{
+    max-width:460px; width:100%; background:var(--white); border-radius:20px;
+    padding:34px 26px; text-align:center; position:relative;
+    transform:scale(.9); transition:transform .6s var(--ease);
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.5);
+  }
+  #reply-modal-overlay.show .reply-modal-card{ transform:scale(1); }
+  .reply-modal-envelope{
+    position:relative; width:240px; height:164px; margin:10px auto 0; cursor:pointer; outline:none;
+  }
+  .reply-modal-envelope .envelope-back{
+    position:absolute; inset:0; border-radius:10px;
+    background:linear-gradient(145deg,#f7d8dc,#f0c2ca);
+    box-shadow:0 18px 34px -18px rgba(91,35,51,.4);
+  }
+  .reply-modal-envelope .envelope-front{
+    position:absolute; left:0; bottom:0; width:100%; height:78%; border-radius:0 0 10px 10px;
+    background:linear-gradient(32deg,transparent 49.5%,rgba(255,253,251,.72) 50%,transparent 50.5%),
+               linear-gradient(-32deg,transparent 49.5%,rgba(255,253,251,.72) 50%,transparent 50.5%),
+               linear-gradient(145deg,#f6cfd5,#e9aeb9);
+  }
+  .reply-modal-envelope .envelope-note{ font-family:var(--script); font-size:1rem; color:var(--burgundy); position:absolute; bottom:10px; width:100%; text-align:center; }
+  .reply-modal-envelope .envelope-flap{
+    position:absolute; top:0; left:0; width:100%; height:98px; transform-origin:top center;
+    clip-path:polygon(0 0,100% 0,50% 100%);
+    background:linear-gradient(180deg,#fff3f4,#e9aeb9);
+    transition:transform .8s var(--ease);
+    z-index:3;
+  }
+  .reply-modal-envelope .envelope-heart{
+    position:absolute; left:50%; top:72px; transform:translate(-50%,-50%);
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg,var(--burgundy),var(--rose)); color:var(--white);
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem; z-index:4;
+    transition:transform .5s var(--ease), opacity .4s var(--ease);
+  }
+  .reply-modal-envelope.opened .envelope-flap{ transform:rotateX(180deg); z-index:1; }
+  .reply-modal-envelope.opened .envelope-heart{ transform:translate(-50%,-50%) scale(.5); opacity:0; }
+  .reply-modal-envelope.opened{ pointer-events:none; }
+  .reply-modal-letter{
+    max-height:0; opacity:0; overflow:hidden; text-align:left;
+    transition:max-height .8s var(--ease), opacity .6s var(--ease), margin-top .8s var(--ease);
+  }
+  .reply-modal-envelope.opened + .reply-modal-letter{
+    max-height:600px; opacity:1; margin-top:20px; overflow:visible;
+  }
+  .reply-modal-letter .letter-body{ font-size:1.1rem; white-space:pre-line; }
+
+  /* ============================================================
+    14. FINAL SCENE
     ============================================================ */
   #finale{
     background:

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://drive.google.com">
   <link rel="preconnect" href="https://drive.usercontent.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/monthsary.css">
+  <link rel="stylesheet" href="assets/monthsary.css?v=reply-mailbox-1">
 </head>
 <body class="story-page">
   <div id="particle-field" aria-hidden="true"></div>
@@ -24,6 +24,25 @@
       <button class="surprise-close" id="surprise-close" aria-label="Close">✕</button>
       <div style="font-size:1.8rem;">💝</div>
       <p class="surprise-message" id="surprise-message"></p>
+    </div>
+  </div>
+
+  <div id="reply-modal-overlay" aria-hidden="true">
+    <div class="reply-modal-card">
+      <button class="surprise-close" id="reply-modal-close" aria-label="Close">x</button>
+
+      <div class="reply-modal-envelope" id="reply-modal-envelope" role="button" tabindex="0" aria-label="Open the letter">
+        <div class="envelope-back"></div>
+        <div class="envelope-front">
+          <div class="envelope-note">Tap to open</div>
+        </div>
+        <div class="envelope-flap"></div>
+        <div class="envelope-heart">❤️</div>
+      </div>
+
+      <div class="reply-modal-letter" id="reply-modal-letter">
+        <p class="letter-body" id="reply-modal-text"></p>
+      </div>
     </div>
   </div>
 
@@ -141,6 +160,24 @@
       <button class="replay-btn reveal" id="replay-btn">Replay Our Story ✨</button>
     </section>
 
+<section id="reply" class="chapter">
+  <p class="eyebrow reveal">Chapter Seven</p>
+  <h2 class="chapter-title reveal">Write Me Back 💌</h2>
+  <p class="chapter-sub reveal">Leave a little letter of your own — I'll read it after.</p>
+
+  <div class="reply-scene reveal" id="reply-scene">
+    <form id="reply-form" class="reply-form">
+      <textarea id="reply-input" class="reply-textarea" placeholder="Write your message here..." rows="6" required></textarea>
+      <button type="submit" class="reply-submit-btn">Send It 💌</button>
+    </form>
+
+    <div class="reply-sent hidden" id="reply-sent">
+      <p class="reply-sent-text">Your letter has been sent 💌</p>
+      <button class="reply-mini-envelope" id="reply-mini-envelope" aria-label="Open the sent letter">✉️</button>
+    </div>
+  </div>
+</section>
+
     <footer class="credit">made with ❤️ — a private film for two</footer>
   </div>
 
@@ -153,7 +190,7 @@
   </div>
   <audio id="bg-audio" loop preload="none"></audio>
 
-  <script src="assets/config.js?v=music-resume-2" defer></script>
-  <script src="assets/story.js?v=music-resume-2" defer></script>
+  <script src="assets/config.js?v=reply-mailbox-1" defer></script>
+  <script src="assets/story.js?v=reply-mailbox-1" defer></script>
 </body>
 </html>
