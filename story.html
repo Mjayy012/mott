@@ -99,33 +99,37 @@
       <h2 class="chapter-title reveal">A Letter For You 💌</h2>
 
       <div class="letter-scene reveal" id="letter-scene">
-        <div class="envelope-stack" id="letter-envelope" role="button" tabindex="0" aria-label="Open the letter">
-          <div class="envelope-back"></div>
-          <div class="letter-paper" id="letter-paper">
-            <p class="letter-greeting">My love,</p>
-            <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
-            <p class="letter-sign">Always yours ❤️</p>
+        <div class="envelope-wrap">
+          <div class="envelope-stack" id="letter-envelope" role="button" tabindex="0" aria-label="Open the letter">
+            <div class="envelope-back"></div>
+            <div class="envelope-front">
+              <div class="envelope-note">A letter sealed with all my love</div>
+            </div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-heart">❤️</div>
           </div>
-          <div class="envelope-front">
-            <div class="envelope-note">A letter sealed with all my love</div>
-          </div>
-          <div class="envelope-flap"></div>
-          <div class="envelope-heart">❤️</div>
         </div>
+
         <button class="letter-open-btn" id="letter-open-btn" aria-expanded="false">Open the Letter 💌</button>
+
+        <div class="letter-paper" id="letter-paper">
+          <p class="letter-greeting">My love,</p>
+          <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
+          <p class="letter-sign">Always yours ❤️</p>
+        </div>
       </div>
     </section>
 
 <section id="quiet" class="chapter">
-      <p class="quiet-line" id="quiet-line-1">If I could choose one person to make more memories with...</p>
-      <p class="quiet-line" id="quiet-line-2">...I would still choose you. Every single time. <span class="end-heart">❤️</span></p>
-      <div class="heartbeat" id="heartbeat">🤍</div>
-    </section>
+  <p class="quiet-line" id="quiet-line-1">If I could choose one person to make more memories with...</p>
+  <p class="quiet-line" id="quiet-line-2">...I would still choose you. Every single time. <span class="end-heart">❤️</span></p>
+  <div class="heartbeat" id="heartbeat">🤍</div>
+</section>
 
 <section id="surprise" class="chapter">
-      <p class="eyebrow reveal">One Last Thing</p>
-      <button class="surprise-btn reveal" id="surprise-btn">There's One More Thing... 💝</button>
-    </section>
+  <p class="eyebrow reveal">One Last Thing</p>
+  <button class="surprise-btn reveal" id="surprise-btn">There's One More Thing... 💝</button>
+</section>
 
 <section id="finale" class="chapter">
       <h2 class="finale-title reveal">Happy Monthsary,<br>My Love ❤️</h2>
@@ -150,6 +154,8 @@
   <audio id="bg-audio" loop preload="none"></audio>
 
   <script src="assets/config.js" defer></script>
+  <script src="assets/shared.js" defer></script>
+  <script src="assets/music.js" defer></script>
   <script src="assets/story.js" defer></script>
 </body>
 </html>
