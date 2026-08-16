@@ -1,0 +1,667 @@
+
+  (function(){
+  "use strict";
+
+  const cfg = window.MONTHSARY;
+  const MONTHSARY_CODE = cfg.MONTHSARY_CODE;
+  const YOUR_NAME = cfg.YOUR_NAME;
+  const PARTNER_NAME = cfg.PARTNER_NAME;
+  const MONTHSARY_NUMBER = cfg.MONTHSARY_NUMBER;
+  const RELATIONSHIP_START_DATE = cfg.RELATIONSHIP_START_DATE;
+  const BACKGROUND_MUSIC = cfg.BACKGROUND_MUSIC;
+  const timelineEntries = cfg.timelineEntries;
+  const photos = cfg.photos;
+  const videos = cfg.videos;
+  const reasons = cfg.reasons;
+  const loveLetter = cfg.loveLetter;
+  const secretMessage = cfg.secretMessage;
+
+  /* ============================================================ 
+    END OF CUSTOMIZATION BLOCK — code below makes it all work
+    ============================================================ */
+
+  document.title = "Happy Monthsary, " + PARTNER_NAME.split(" ")[0] + " ❤️";
+
+  /* ---------------- populate text content ---------------- */
+      document.getElementById('finale-names').textContent = YOUR_NAME + " ❤️ " + PARTNER_NAME;
+  document.getElementById('letter-body').textContent = loveLetter;
+  document.getElementById('surprise-message').textContent = secretMessage;
+
+  const letterScene = document.getElementById('letter-scene');
+  const letterPaper = document.getElementById('letter-paper');
+  function openLetter(){
+    if(!letterScene || letterScene.classList.contains('opened')) return;
+    letterScene.classList.add('opened');
+    document.getElementById('letter-open-btn').setAttribute('aria-expanded', 'true');
+    setTimeout(function(){ letterScene.scrollIntoView({ behavior:'smooth', block:'center' }); }, 450);
+  }
+  document.getElementById('letter-envelope').addEventListener('click', openLetter);
+  document.getElementById('letter-envelope').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      openLetter();
+    }
+  });
+  document.getElementById('letter-open-btn').addEventListener('click', openLetter);
+
+  /* ---------------- timeline ---------------- */
+  const timelineEl = document.getElementById('timeline');
+  timelineEntries.forEach(function(item){
+    const div = document.createElement('div');
+    div.className = 'timeline-item reveal';
+    div.innerHTML =
+      '<span class="timeline-dot">❤</span>' +
+      '<div class="timeline-date">' + escapeHtml(item.date) + '</div>' +
+      '<div class="timeline-title">' + escapeHtml(item.title) + '</div>' +
+      '<p class="timeline-desc">' + escapeHtml(item.desc) + '</p>' +
+      (item.photo ? '<div class="timeline-photo"><img src="' + item.photo + '" alt="' + escapeHtml(item.title) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>' : '');
+    timelineEl.appendChild(div);
+  });
+
+  /* ---------------- reasons ---------------- */
+  const reasonsGrid = document.getElementById('reasons-grid');
+  reasons.forEach(function(r){
+    const card = document.createElement('div');
+    card.className = 'reason-card reveal';
+    card.innerHTML = '<span class="reason-heart">❤</span>' + escapeHtml(r);
+    reasonsGrid.appendChild(card);
+  });
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  const experience = document.getElementById('experience');
+
+  /* ============================================================
+    AMBIENT PARTICLE FIELD (candlelight motif)
+    ============================================================ */
+  const particleField = document.getElementById('particle-field');
+  function spawnParticles(){
+    for(let i=0; i<16; i++){
+      const p = document.createElement('div');
+      const isHeart = i % 4 === 0;
+      p.className = isHeart ? 'heart-float' : 'particle';
+      if(isHeart) p.textContent = '❤';
+      const size = isHeart ? (10 + Math.random()*8) : (3 + Math.random()*6);
+      if(!isHeart){ p.style.width = size + 'px'; p.style.height = size + 'px'; }
+      else { p.style.fontSize = size + 'px'; }
+      p.style.left = (Math.random()*100) + '%';
+      p.style.setProperty('--dx', (Math.random()*60-30) + 'px');
+      p.style.animationDuration = (14 + Math.random()*14) + 's';
+      p.style.animationDelay = (Math.random()*16) + 's';
+      particleField.appendChild(p);
+    }
+  }
+  spawnParticles();
+
+  /* ============================================================
+    SCROLL REVEAL
+    ============================================================ */
+  let revealObserver;
+  function initRevealObserver(){
+    if(revealObserver) return;
+    revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(function(el){ revealObserver.observe(el); });
+
+    // quiet moment sequential lines
+    const quietObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          document.getElementById('quiet-line-1').classList.add('show');
+          setTimeout(function(){ document.getElementById('quiet-line-2').classList.add('show'); }, 1400);
+          setTimeout(function(){ document.getElementById('heartbeat').classList.add('show'); }, 2200);
+          quietObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    quietObserver.observe(document.getElementById('quiet'));
+  }
+
+
+  /* ============================================================
+    3. BACKGROUND MUSIC CONTROL
+    ============================================================ */
+  const bgAudio = document.getElementById('bg-audio');
+  const musicControl = document.getElementById('music-control');
+  const musicToggle = document.getElementById('music-toggle');
+  const muteToggle = document.getElementById('mute-toggle');
+  const volumeSlider = document.getElementById('volume-slider');
+  let musicEnabled = !!BACKGROUND_MUSIC;
+
+  if(musicEnabled){
+    bgAudio.src = BACKGROUND_MUSIC;
+    bgAudio.preload = 'auto';
+    bgAudio.volume = 0.5;
+  } else {
+    musicControl.style.display = 'none';
+  }
+
+  let musicResumeQueued = false;
+
+  function setMusicPlayingState(isPlaying){
+    musicControl.classList.toggle('playing', isPlaying);
+    musicToggle.textContent = isPlaying ? '♪' : '❚❚';
+  }
+
+  function playMusicSafely(){
+    if(!musicEnabled) return Promise.resolve(false);
+    bgAudio.muted = false;
+    muteToggle.textContent = '🔊';
+
+    const p = bgAudio.play();
+    if(p && p.then){
+      return p.then(function(){
+        setMusicPlayingState(true);
+        return true;
+      }).catch(function(){
+        setMusicPlayingState(false);
+        queueMusicResume();
+        return false;
+      });
+    }
+
+    setMusicPlayingState(true);
+    return Promise.resolve(true);
+  }
+
+  function queueMusicResume(){
+    if(musicResumeQueued || !musicEnabled) return;
+    musicResumeQueued = true;
+
+    const resume = function(){
+      musicResumeQueued = false;
+      document.removeEventListener('pointerdown', resume);
+      document.removeEventListener('touchstart', resume);
+      document.removeEventListener('click', resume);
+      document.removeEventListener('keydown', resume);
+      playMusicSafely();
+    };
+
+    document.addEventListener('pointerdown', resume, { once:true });
+    document.addEventListener('touchstart', resume, { once:true });
+    document.addEventListener('click', resume, { once:true });
+    document.addEventListener('keydown', resume, { once:true });
+  }
+
+  function attemptAutoplayMusic(){
+    if(!musicEnabled) return;
+    playMusicSafely();
+    bgAudio.addEventListener('canplay', function(){
+      if(bgAudio.paused) playMusicSafely();
+    }, { once:true });
+    return;
+    const p = bgAudio.play();
+    if(p && p.then){
+      p.then(function(){ musicControl.classList.add('playing'); })
+      .catch(function(){ /* autoplay blocked — wait for first interaction */
+          const resume = function(){
+            bgAudio.play().then(function(){ musicControl.classList.add('playing'); }).catch(function(){});
+            document.removeEventListener('click', resume);
+            document.removeEventListener('touchstart', resume);
+          };
+          document.addEventListener('click', resume, { once:true });
+          document.addEventListener('touchstart', resume, { once:true });
+      });
+    }
+  }
+
+  musicToggle.addEventListener('click', function(){
+    if(!musicEnabled) return;
+    if(bgAudio.paused){
+      playMusicSafely();
+    } else {
+      bgAudio.pause();
+      setMusicPlayingState(false);
+    }
+    musicControl.classList.toggle('tucked');
+  });
+
+  muteToggle.addEventListener('click', function(e){
+    e.stopPropagation();
+    bgAudio.muted = !bgAudio.muted;
+    muteToggle.textContent = bgAudio.muted ? '🔇' : '🔊';
+  });
+
+  volumeSlider.addEventListener('input', function(e){
+    e.stopPropagation();
+    bgAudio.volume = parseFloat(volumeSlider.value);
+    if(bgAudio.volume === 0){ bgAudio.muted = true; muteToggle.textContent = '🔇'; }
+    else { bgAudio.muted = false; muteToggle.textContent = '🔊'; }
+  });
+  volumeSlider.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  function fadeMusic(targetVol, duration){
+    if(!musicEnabled) return;
+    const startVol = bgAudio.volume;
+    const startTime = performance.now();
+    function step(now){
+      const t = Math.min(1, (now - startTime) / duration);
+      bgAudio.volume = startVol + (targetVol - startVol) * t;
+      if(t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  let musicPausedByVideo = false;
+  let driveMusicSilenced = false;
+  let driveMusicVolumeBeforeSilence = 0.5;
+
+  function pauseMusicForVideo(){
+    if(!musicEnabled || bgAudio.paused) return;
+    musicPausedByVideo = true;
+    bgAudio.pause();
+    setMusicPlayingState(false);
+  }
+
+  function resumeMusicAfterVideo(){
+    if(!musicEnabled || !musicPausedByVideo) return;
+    musicPausedByVideo = false;
+    playMusicSafely();
+  }
+
+  function silenceMusicForDriveVideo(){
+    if(!musicEnabled || driveMusicSilenced || bgAudio.paused) return;
+    driveMusicSilenced = true;
+    driveMusicVolumeBeforeSilence = bgAudio.volume || parseFloat(volumeSlider.value) || 0.5;
+    fadeMusic(0, 220);
+  }
+
+  function restoreMusicAfterDriveVideo(){
+    if(!musicEnabled || !driveMusicSilenced) return;
+    driveMusicSilenced = false;
+    bgAudio.muted = false;
+    muteToggle.textContent = '🔊';
+    const targetVolume = parseFloat(volumeSlider.value) || driveMusicVolumeBeforeSilence || 0.5;
+    fadeMusic(targetVolume, 520);
+    setMusicPlayingState(!bgAudio.paused);
+  }
+
+  function pauseCurrentVideoForScroll(){
+    const v = currentVideoEl();
+    if(!v || v.paused) return;
+    v.pause();
+    document.getElementById('video-playpause').textContent = '▶';
+  }
+
+  /* ============================================================
+    5. CINEMATIC PHOTO SLIDESHOW
+    ============================================================ */
+  let currentSlide = 0;
+  let slideTimer = null;
+  let slideshowInit = false;
+
+  function initSlideshow(){
+    if(slideshowInit) return;
+    slideshowInit = true;
+    const wrap = document.getElementById('slides-wrap');
+    const dotsWrap = document.getElementById('slide-dots');
+
+    photos.forEach(function(photo, i){
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      slide.dataset.index = i;
+
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = photo.caption || ('Memory ' + (i+1));
+      img.loading = 'lazy';
+      img.onerror = function(){
+        slide.innerHTML = '<div class="slide-placeholder"><span class="ph-icon">🤍</span><span>Add ' + photo.src + ' to see this memory</span></div>' +
+          '<div class="slide-caption">' + escapeHtml(photo.caption || '') + '</div>';
+      };
+      slide.appendChild(img);
+
+      const cap = document.createElement('div');
+      cap.className = 'slide-caption';
+      cap.textContent = photo.caption || '';
+      slide.appendChild(cap);
+
+      wrap.appendChild(slide);
+
+      const dot = document.createElement('button');
+      dot.className = 'slide-dot';
+      dot.setAttribute('aria-label', 'Go to photo ' + (i+1));
+      dot.addEventListener('click', function(){ goToSlide(i); });
+      dotsWrap.appendChild(dot);
+    });
+
+    document.getElementById('slide-prev').addEventListener('click', function(){ goToSlide(currentSlide - 1); });
+    document.getElementById('slide-next').addEventListener('click', function(){ goToSlide(currentSlide + 1); });
+    document.getElementById('slide-play').addEventListener('click', toggleSlideshowAuto);
+
+    // swipe support
+    let touchX = null;
+    const stage = document.getElementById('slideshow');
+    stage.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+      if(touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if(Math.abs(dx) > 40){ dx < 0 ? goToSlide(currentSlide+1) : goToSlide(currentSlide-1); }
+      touchX = null;
+    }, {passive:true});
+
+    renderSlide();
+  }
+
+  function renderSlide(){
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slide-dot');
+    slides.forEach(function(s, i){
+      s.classList.toggle('active', i === currentSlide);
+      s.classList.toggle('kenburns', i === currentSlide);
+    });
+    dots.forEach(function(d, i){ d.classList.toggle('active', i === currentSlide); });
+    document.getElementById('slide-progress').textContent = (currentSlide+1) + ' / ' + photos.length;
+
+    if(currentSlide === photos.length - 1){
+      // reached the end — cue the cinematic transition (only advances automatically in auto mode)
+    }
+  }
+
+  function goToSlide(i){
+    const prev = currentSlide;
+    currentSlide = (i + photos.length) % photos.length;
+    renderSlide();
+    if(prev === photos.length - 1 && currentSlide === 0 && i === photos.length){
+      triggerCineTransition();
+    }
+  }
+
+  let autoPlaying = false;
+  function toggleSlideshowAuto(){
+    autoPlaying = !autoPlaying;
+    const btn = document.getElementById('slide-play');
+    if(autoPlaying){
+      btn.textContent = '❚❚ Pause slideshow';
+      slideTimer = setInterval(function(){
+        if(currentSlide === photos.length - 1){
+          clearInterval(slideTimer);
+          autoPlaying = false;
+          btn.textContent = '▶ Play slideshow';
+          triggerCineTransition();
+        } else {
+          goToSlide(currentSlide + 1);
+        }
+      }, 3800);
+    } else {
+      btn.textContent = '▶ Play slideshow';
+      clearInterval(slideTimer);
+    }
+  }
+
+  function triggerCineTransition(){
+    const overlay = document.getElementById('cine-transition');
+    const l1 = document.getElementById('cine-line-1');
+    const l2 = document.getElementById('cine-line-2');
+    overlay.classList.add('show');
+    fadeMusic(0.15, 800);
+    setTimeout(function(){ l1.classList.add('show'); }, 300);
+    setTimeout(function(){ l1.classList.remove('show'); }, 2200);
+    setTimeout(function(){ l2.classList.add('show'); }, 2700);
+    setTimeout(function(){
+      overlay.classList.remove('show');
+      l2.classList.remove('show');
+      fadeMusic(0.5, 1200);
+      document.getElementById('videos').scrollIntoView({ behavior:'smooth' });
+    }, 4700);
+  }
+
+  /* ============================================================
+    7. VIDEO MEMORIES
+    ============================================================ */
+  let currentVideo = 0;
+  let videosInit = false;
+  let userInteracted = false;
+
+  function initVideos(){
+    if(videosInit) return;
+    videosInit = true;
+    const wrap = document.getElementById('video-frames-wrap');
+
+    videos.forEach(function(v, i){
+      const frame = document.createElement('div');
+      frame.className = 'video-frame';
+      frame.dataset.index = i;
+
+      if(v.type === 'drive'){
+        const iframe = document.createElement('iframe');
+        iframe.src = v.src;
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.loading = 'eager';
+        iframe.title = v.caption || 'Google Drive video memory';
+        frame.appendChild(iframe);
+
+        const cap = document.createElement('p');
+        cap.className = 'video-caption';
+        cap.textContent = v.caption || '';
+        frame.appendChild(cap);
+
+        const note = document.createElement('div');
+        note.className = 'drive-video-note';
+        note.textContent = 'Google Drive video uses its own player controls.';
+        frame.appendChild(note);
+
+        wrap.appendChild(frame);
+        return;
+      }
+
+      const vid = document.createElement('video');
+      vid.src = v.src;
+      vid.playsInline = true;
+      vid.muted = true; // respect autoplay restrictions until user interacts
+      vid.controls = false;
+      vid.preload = 'auto';
+      vid.addEventListener('play', pauseMusicForVideo);
+      vid.addEventListener('pause', resumeMusicAfterVideo);
+      vid.onerror = function(){
+        frame.innerHTML = '<div class="video-placeholder"><span style="font-size:2rem;">🎬</span><span>Add ' + v.src + ' to see this memory</span></div>' +
+          '<p class="video-caption">' + escapeHtml(v.caption || '') + '</p>';
+      };
+      vid.addEventListener('ended', function(){
+        resumeMusicAfterVideo();
+        document.getElementById('video-playpause').textContent = '▶';
+        if(i < videos.length - 1){
+          document.getElementById('video-next-cta').classList.add('show');
+        }
+      });
+      frame.appendChild(vid);
+
+      const cap = document.createElement('p');
+      cap.className = 'video-caption';
+      cap.textContent = v.caption || '';
+      frame.appendChild(cap);
+
+      wrap.appendChild(frame);
+    });
+
+    document.getElementById('video-playpause').addEventListener('click', function(){
+      userInteracted = true;
+      const v = currentVideoEl();
+      if(!v) return;
+      if(v.paused){
+        pauseMusicForVideo();
+        v.muted = false;
+        v.play().catch(function(){});
+        this.textContent = '❚❚';
+      } else {
+        v.pause();
+        this.textContent = '▶';
+      }
+    });
+    document.getElementById('video-mute').addEventListener('click', function(){
+      const v = currentVideoEl(); if(!v) return;
+      v.muted = !v.muted;
+      this.textContent = v.muted ? '🔇' : '🔊';
+    });
+    document.getElementById('video-fullscreen').addEventListener('click', function(){
+      const v = currentVideoEl(); if(!v) return;
+      if(v.requestFullscreen) v.requestFullscreen();
+      else if(v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+    });
+    document.getElementById('video-prev').addEventListener('click', function(){ goToVideo(currentVideo - 1); });
+    document.getElementById('video-next').addEventListener('click', function(){ goToVideo(currentVideo + 1); });
+    document.getElementById('video-next-cta').addEventListener('click', function(){
+      document.getElementById('video-next-cta').classList.remove('show');
+      goToVideo(currentVideo + 1);
+    });
+
+    const videoSection = document.getElementById('videos');
+    if('IntersectionObserver' in window && videoSection){
+      const videoScrollObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          const activeVideo = videos[currentVideo] || {};
+          if(activeVideo.type === 'drive'){
+            if(entry.isIntersecting && entry.intersectionRatio >= 0.12){
+              silenceMusicForDriveVideo();
+            } else {
+              restoreMusicAfterDriveVideo();
+            }
+            return;
+          }
+
+          if(!entry.isIntersecting || entry.intersectionRatio < 0.25){
+            pauseCurrentVideoForScroll();
+          }
+        });
+      }, { threshold:[0, 0.12, 0.25, 0.5] });
+      videoScrollObserver.observe(videoSection);
+    }
+
+    renderVideo();
+  }
+
+  function currentVideoEl(){
+    const frame = document.querySelector('.video-frame[data-index="' + currentVideo + '"]');
+    return frame ? frame.querySelector('video') : null;
+  }
+
+  function renderVideo(){
+    document.querySelectorAll('.video-frame').forEach(function(f){
+      const idx = parseInt(f.dataset.index, 10);
+      f.classList.toggle('active', idx === currentVideo);
+      const v = f.querySelector('video');
+      if(v && idx !== currentVideo) v.pause();
+    });
+    const activeConfig = videos[currentVideo] || {};
+    document.getElementById('video-stage').classList.toggle('drive-mode', activeConfig.type === 'drive');
+    document.getElementById('video-counter').textContent = (currentVideo+1) + ' / ' + videos.length;
+    document.getElementById('video-playpause').textContent = '▶';
+    document.getElementById('video-next-cta').classList.remove('show');
+  }
+
+  function goToVideo(i){
+    if(i < 0 || i >= videos.length) return;
+    currentVideo = i;
+    renderVideo();
+  }
+
+  function startExperience(){
+    experience.classList.add('revealed');
+    document.getElementById('music-control').setAttribute('aria-hidden','false');
+    document.getElementById('music-control').style.display = 'flex';
+    attemptAutoplayMusic();
+    initRevealObserver();
+    initSlideshow();
+    initVideos();
+    startCounter();
+  }
+
+  /* ============================================================
+    9. LIVE RELATIONSHIP COUNTER
+    ============================================================ */
+  function startCounter(){
+    const startDate = new Date(RELATIONSHIP_START_DATE + 'T00:00:00');
+    function update(){
+      const now = new Date();
+      let diffMs = now - startDate;
+      if(diffMs < 0) diffMs = 0;
+
+      let months = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+      if(now.getDate() < startDate.getDate()) months--;
+      if(months < 0) months = 0;
+
+      const anchor = new Date(startDate);
+      anchor.setMonth(anchor.getMonth() + months);
+      let remainderMs = now - anchor;
+      if(remainderMs < 0) remainderMs = 0;
+
+      const days = Math.floor(remainderMs / (1000*60*60*24));
+      const hours = Math.floor((remainderMs / (1000*60*60)) % 24);
+      const mins = Math.floor((remainderMs / (1000*60)) % 60);
+      const secs = Math.floor((remainderMs / 1000) % 60);
+
+      document.getElementById('c-months').textContent = months;
+      document.getElementById('c-days').textContent = days;
+      document.getElementById('c-hours').textContent = hours;
+      document.getElementById('c-mins').textContent = mins;
+      document.getElementById('c-secs').textContent = secs;
+    }
+    update();
+    setInterval(update, 1000);
+  }
+
+  /* ============================================================
+    12. SECRET SURPRISE
+    ============================================================ */
+  const surpriseBtn = document.getElementById('surprise-btn');
+  const surpriseOverlay = document.getElementById('surprise-overlay');
+  surpriseBtn.addEventListener('click', function(){
+    surpriseOverlay.classList.add('show');
+    spawnSurpriseHearts();
+  });
+  document.getElementById('surprise-close').addEventListener('click', function(){
+    surpriseOverlay.classList.remove('show');
+  });
+  surpriseOverlay.addEventListener('click', function(e){
+    if(e.target === surpriseOverlay) surpriseOverlay.classList.remove('show');
+  });
+
+  function spawnSurpriseHearts(){
+    for(let i=0; i<20; i++){
+      const h = document.createElement('div');
+      h.textContent = '❤';
+      h.style.position = 'fixed';
+      h.style.left = (Math.random()*100) + '%';
+      h.style.bottom = '-20px';
+      h.style.fontSize = (0.9 + Math.random()*1.2) + 'rem';
+      h.style.color = Math.random() > .5 ? '#e3a9b4' : '#c9a66b';
+      h.style.zIndex = '9996';
+      h.style.opacity = '.9';
+      h.style.transition = 'transform 2.6s ease-out, opacity 2.6s ease-out';
+      document.body.appendChild(h);
+      requestAnimationFrame(function(){
+        h.style.transform = 'translateY(-' + (60+Math.random()*40) + 'vh) translateX(' + (Math.random()*80-40) + 'px)';
+        h.style.opacity = '0';
+      });
+      setTimeout(function(){ h.remove(); }, 2800);
+    }
+  }
+
+  /* ============================================================
+    14. REPLAY
+    ============================================================ */
+  document.getElementById('replay-btn').addEventListener('click', function(){
+    if(musicEnabled){ bgAudio.pause(); }
+    sessionStorage.removeItem('monthsaryUnlocked');
+    window.location.href = 'index.html';
+  });
+
+  if(sessionStorage.getItem('monthsaryUnlocked') !== 'yes'){
+    window.location.replace('index.html');
+  } else {
+    startExperience();
+  }
+
+  })();
+  
