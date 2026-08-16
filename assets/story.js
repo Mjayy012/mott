@@ -684,14 +684,16 @@
     const form = document.getElementById('reply-form');
     const sentBox = document.getElementById('reply-sent');
     const miniEnvelope = document.getElementById('reply-mini-envelope');
+    const editBtn = document.getElementById('reply-edit-btn');
     const overlay = document.getElementById('reply-modal-overlay');
     const modalClose = document.getElementById('reply-modal-close');
+    const modalScene = document.getElementById('reply-modal-scene');
     const modalEnvelope = document.getElementById('reply-modal-envelope');
     const modalText = document.getElementById('reply-modal-text');
     const input = document.getElementById('reply-input');
     const storageKey = 'monthsary_reply_message';
 
-    if(!form || !sentBox || !miniEnvelope || !overlay || !modalClose || !modalEnvelope || !modalText || !input) return;
+    if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
 
     function getStoredReply(){
       try{ return localStorage.getItem(storageKey) || ''; }
@@ -709,9 +711,17 @@
       modalText.textContent = message;
     }
 
+    function showFormState(message){
+      sentBox.classList.add('hidden');
+      form.classList.remove('hidden');
+      input.value = message || '';
+      input.focus();
+    }
+
     function openModal(){
       const message = getStoredReply();
       if(message) modalText.textContent = message;
+      modalScene.classList.remove('opened');
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
       modalEnvelope.focus();
@@ -720,11 +730,11 @@
     function closeModal(){
       overlay.classList.remove('show');
       overlay.setAttribute('aria-hidden', 'true');
-      modalEnvelope.classList.remove('opened');
+      modalScene.classList.remove('opened');
     }
 
     function openLetter(){
-      modalEnvelope.classList.add('opened');
+      modalScene.classList.add('opened');
     }
 
     const existing = getStoredReply();
@@ -739,6 +749,9 @@
     });
 
     miniEnvelope.addEventListener('click', openModal);
+    editBtn.addEventListener('click', function(){
+      showFormState(getStoredReply());
+    });
     modalClose.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e){
       if(e.target === overlay) closeModal();

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://drive.google.com">
   <link rel="preconnect" href="https://drive.usercontent.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/monthsary.css?v=reply-mailbox-1">
+  <link rel="stylesheet" href="assets/monthsary.css?v=reply-mailbox-2">
 </head>
 <body class="story-page">
   <div id="particle-field" aria-hidden="true"></div>
@@ -31,17 +31,21 @@
     <div class="reply-modal-card">
       <button class="surprise-close" id="reply-modal-close" aria-label="Close">x</button>
 
-      <div class="reply-modal-envelope" id="reply-modal-envelope" role="button" tabindex="0" aria-label="Open the letter">
-        <div class="envelope-back"></div>
-        <div class="envelope-front">
-          <div class="envelope-note">Tap to open</div>
+      <div class="reply-modal-scene" id="reply-modal-scene">
+        <div class="reply-modal-envelope-wrap">
+          <div class="reply-modal-envelope" id="reply-modal-envelope" role="button" tabindex="0" aria-label="Open the letter">
+            <div class="envelope-back"></div>
+            <div class="envelope-front">
+              <div class="envelope-note">Tap to open</div>
+            </div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-heart">❤️</div>
+          </div>
         </div>
-        <div class="envelope-flap"></div>
-        <div class="envelope-heart">❤️</div>
-      </div>
 
-      <div class="reply-modal-letter" id="reply-modal-letter">
-        <p class="letter-body" id="reply-modal-text"></p>
+        <div class="reply-modal-letter" id="reply-modal-letter">
+          <p class="letter-body" id="reply-modal-text"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -173,7 +177,10 @@
 
     <div class="reply-sent hidden" id="reply-sent">
       <p class="reply-sent-text">Your letter has been sent 💌</p>
-      <button class="reply-mini-envelope" id="reply-mini-envelope" aria-label="Open the sent letter">✉️</button>
+      <div class="reply-sent-actions">
+        <button class="reply-mini-envelope" id="reply-mini-envelope" aria-label="Open the sent letter">✉️</button>
+        <button class="reply-edit-btn" id="reply-edit-btn" type="button">Edit Letter</button>
+      </div>
     </div>
   </div>
 </section>
@@ -190,7 +197,7 @@
   </div>
   <audio id="bg-audio" loop preload="none"></audio>
 
-  <script src="assets/config.js?v=reply-mailbox-1" defer></script>
-  <script src="assets/story.js?v=reply-mailbox-1" defer></script>
+  <script src="assets/config.js?v=reply-mailbox-2" defer></script>
+  <script src="assets/story.js?v=reply-mailbox-2" defer></script>
 </body>
 </html>
