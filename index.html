@@ -6,6 +6,8 @@
   <title>Our Monthsary ❤️</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://drive.google.com">
+  <link rel="preconnect" href="https://drive.usercontent.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
   /* ============================================================
@@ -535,6 +537,8 @@
   .video-frame{ display:none; }
   .video-frame.active{ display:block; }
   .video-frame video{ width:100%; display:block; aspect-ratio:7/3; object-fit:contain; background:#1b0d12; }
+  .video-frame iframe{ width:100%; display:block; aspect-ratio:7/3; border:0; background:#1b0d12; }
+  .video-stage.drive-mode .video-controls{ display:none; }
   .video-placeholder{
     aspect-ratio:7/3; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:10px; color:var(--gold-soft); background:linear-gradient(160deg,#3d1622,#1b0d12);
@@ -557,6 +561,7 @@
   @media(max-width:720px){
     .video-stage{ width:94vw; border-radius:16px; }
     .video-frame video,
+    .video-frame iframe,
     .video-placeholder{ aspect-ratio:7/3; }
   }
   .video-next-btn{
@@ -565,6 +570,13 @@
     opacity:0; pointer-events:none; transition:opacity .4s;
   }
   .video-next-btn.show{ opacity:1; pointer-events:all; }
+  .drive-video-note{
+    padding:10px 20px 18px;
+    color:var(--gold-soft);
+    font-size:.78rem;
+    opacity:.8;
+    text-align:center;
+  }
 
   /* ============================================================
     8. REASONS I LOVE YOU
@@ -1253,7 +1265,12 @@
 
   // --- Videos for the video memories section ---
   const videos = [
-    { src: "videos/Mots-optimized.mp4", caption: "A moment I'll always treasure. ❤️" },
+    {
+      type: "drive",
+      src: "https://drive.google.com/file/d/1vQ_bLI286d_0f4tniYihCIWaSm4vw_WR/preview",
+      link: "https://drive.google.com/file/d/1vQ_bLI286d_0f4tniYihCIWaSm4vw_WR/view?usp=sharing",
+      caption: "A moment I'll always treasure. ❤️"
+    },
   ];
 
   // --- Reasons I love you ---
@@ -1829,6 +1846,29 @@
       frame.className = 'video-frame';
       frame.dataset.index = i;
 
+      if(v.type === 'drive'){
+        const iframe = document.createElement('iframe');
+        iframe.src = v.src;
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.loading = 'eager';
+        iframe.title = v.caption || 'Google Drive video memory';
+        frame.appendChild(iframe);
+
+        const cap = document.createElement('p');
+        cap.className = 'video-caption';
+        cap.textContent = v.caption || '';
+        frame.appendChild(cap);
+
+        const note = document.createElement('div');
+        note.className = 'drive-video-note';
+        note.textContent = 'Google Drive video uses its own player controls.';
+        frame.appendChild(note);
+
+        wrap.appendChild(frame);
+        return;
+      }
+
       const vid = document.createElement('video');
       vid.src = v.src;
       vid.playsInline = true;
@@ -1916,6 +1956,8 @@
       const v = f.querySelector('video');
       if(v && idx !== currentVideo) v.pause();
     });
+    const activeConfig = videos[currentVideo] || {};
+    document.getElementById('video-stage').classList.toggle('drive-mode', activeConfig.type === 'drive');
     document.getElementById('video-counter').textContent = (currentVideo+1) + ' / ' + videos.length;
     document.getElementById('video-playpause').textContent = '▶';
     document.getElementById('video-next-cta').classList.remove('show');
