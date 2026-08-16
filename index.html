@@ -230,7 +230,8 @@
   body.hero-page #experience > section:not(#hero),
   body.hero-page footer,
   body.hero-page #cine-transition,
-  body.hero-page #surprise-overlay{
+  body.hero-page #surprise-overlay,
+  body.hero-page #music-control{
     display:none !important;
   }
   body.hero-page #experience,
@@ -1141,7 +1142,6 @@
 
     setTimeout(function(){
       sessionStorage.setItem('monthsaryUnlocked', 'yes');
-      sessionStorage.setItem('monthsaryAutoplayMusic', 'yes');
       window.location.href = 'surprise.html';
     }, 2200);
   }
@@ -1258,6 +1258,7 @@
     if(isHeroPage){
       document.body.classList.add('story-opening');
       sessionStorage.setItem('monthsaryUnlocked', 'yes');
+      sessionStorage.setItem('monthsaryAutoplayMusic', 'yes');
       setTimeout(function(){
         window.location.href = 'story.html';
       }, 520);
@@ -1665,9 +1666,10 @@
 
   function startHero(){
     experience.classList.add('revealed');
-    document.getElementById('music-control').setAttribute('aria-hidden','false');
-    document.getElementById('music-control').style.display = 'flex';
-    attemptAutoplayMusic();
+    if(musicEnabled){
+      bgAudio.pause();
+      setMusicPlayingState(false);
+    }
   }
 
   /* ============================================================
