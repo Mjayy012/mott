@@ -789,6 +789,17 @@
       });
     }
 
+    function loadReplyOnline(){
+      return fetch(apiUrl, { cache: 'no-store' }).then(function(response){
+        return response.json().catch(function(){ return {}; }).then(function(data){
+          if(!response.ok || !data.ok){
+            throw new Error(data.error || 'Could not load online reply.');
+          }
+          return data.reply || null;
+        });
+      });
+    }
+
     function openModal(){
       const message = getStoredReply();
       if(message) modalText.textContent = message;
@@ -810,6 +821,11 @@
 
     const existing = getStoredReply();
     if(existing) showSentState(existing, wasSavedOnline() ? 'online' : 'local');
+    loadReplyOnline().then(function(reply){
+      if(!reply || !reply.message) return;
+      storeReply(reply.message, true);
+      showSentState(reply.message, 'online');
+    }).catch(function(){});
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
