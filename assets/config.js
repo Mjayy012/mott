@@ -5,6 +5,7 @@ window.MONTHSARY = {
   "MONTHSARY_NUMBER": "2",
   "RELATIONSHIP_START_DATE": "2026-06-10",
   "BACKGROUND_MUSIC": "music/theme-song.mp3",
+  "GOOGLE_SCRIPT_URL": "",
   "timelineEntries": [
     {
       "date": "Aug 2021",

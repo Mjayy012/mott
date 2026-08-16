@@ -9,6 +9,7 @@
   const MONTHSARY_NUMBER = cfg.MONTHSARY_NUMBER;
   const RELATIONSHIP_START_DATE = cfg.RELATIONSHIP_START_DATE;
   const BACKGROUND_MUSIC = cfg.BACKGROUND_MUSIC;
+  const GOOGLE_SCRIPT_URL = cfg.GOOGLE_SCRIPT_URL || '';
   const timelineEntries = cfg.timelineEntries;
   const photos = cfg.photos;
   const videos = cfg.videos;
@@ -720,7 +721,6 @@
     const input = document.getElementById('reply-input');
     const status = document.getElementById('reply-status');
     const sentText = sentBox.querySelector('.reply-sent-text');
-    const replySourceUrl = 'replies.html';
     let pageReplyMessage = '';
 
     if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
@@ -755,26 +755,88 @@
       input.focus();
     }
 
-    function loadReplyFromPage(){
-      return fetch(replySourceUrl + '?v=' + Date.now(), { cache: 'no-store' })
-        .then(function(response){
-          if(!response.ok) throw new Error('Could not load replies.html.');
-          return response.text();
-        })
-        .then(function(html){
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          const data = doc.getElementById('monthsary-reply-data');
-          const text = doc.getElementById('monthsary-reply-message');
+    function appendQuery(url, params){
+      const parts = [];
+      Object.keys(params).forEach(function(key){
+        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+      });
+      return url + (url.indexOf('?') === -1 ? '?' : '&') + parts.join('&');
+    }
 
-          if(data){
-            try{
-              const parsed = JSON.parse(data.textContent || '{}');
-              if(parsed && parsed.message) return String(parsed.message).trim();
-            }catch(e){}
-          }
+    function loadReplyFromSheet(){
+      if(!GOOGLE_SCRIPT_URL) return Promise.resolve('');
 
-          return text ? text.textContent.trim() : '';
+      return new Promise(function(resolve, reject){
+        const callbackName = 'monthsaryReplyCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const script = document.createElement('script');
+        let finished = false;
+        const timeout = setTimeout(function(){
+          cleanup();
+          reject(new Error('Google Sheet reply load timed out.'));
+        }, 12000);
+
+        function cleanup(){
+          if(finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if(script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[callbackName] = function(data){
+          const reply = data && data.reply ? data.reply : {};
+          cleanup();
+          resolve(reply.message ? String(reply.message).trim() : '');
+        };
+
+        script.onerror = function(){
+          cleanup();
+          reject(new Error('Could not load the Google Sheet reply.'));
+        };
+        script.src = appendQuery(GOOGLE_SCRIPT_URL, {
+          callback: callbackName,
+          v: Date.now()
         });
+        document.body.appendChild(script);
+      });
+    }
+
+    function saveReplyToSheet(message){
+      if(!GOOGLE_SCRIPT_URL) return Promise.reject(new Error('Google Script URL is missing.'));
+
+      return new Promise(function(resolve){
+        const iframeName = 'reply-save-frame-' + Date.now();
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.className = 'visually-hidden';
+
+        const formEl = document.createElement('form');
+        formEl.method = 'POST';
+        formEl.action = GOOGLE_SCRIPT_URL;
+        formEl.target = iframeName;
+        formEl.className = 'visually-hidden';
+
+        [
+          ['message', message],
+          ['page', window.location.pathname.split('/').pop() || 'story.html']
+        ].forEach(function(pair){
+          const field = document.createElement('input');
+          field.type = 'hidden';
+          field.name = pair[0];
+          field.value = pair[1];
+          formEl.appendChild(field);
+        });
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(formEl);
+        formEl.submit();
+
+        setTimeout(function(){
+          formEl.remove();
+          iframe.remove();
+          resolve();
+        }, 1800);
+      });
     }
 
     function openModal(){
@@ -795,7 +857,7 @@
       modalScene.classList.add('opened');
     }
 
-    loadReplyFromPage().then(function(message){
+    loadReplyFromSheet().then(function(message){
       if(!message){
         pageReplyMessage = '';
         modalText.textContent = '';
@@ -809,7 +871,21 @@
       e.preventDefault();
       const message = input.value.trim();
       if(!message) return;
-      setStatus('This page cannot write to replies.html on GitHub Pages. Put the message in replies.html and push it to show on all devices.', true);
+      if(!GOOGLE_SCRIPT_URL){
+        setStatus('Add your Google Apps Script URL in assets/config.js first.', true);
+        return;
+      }
+
+      setStatus('Sending your letter...');
+      saveReplyToSheet(message).then(function(){
+        return loadReplyFromSheet();
+      }).then(function(savedMessage){
+        pageReplyMessage = savedMessage || message;
+        showSentState(pageReplyMessage, 'page');
+        setStatus('');
+      }).catch(function(){
+        setStatus('Could not save yet. Check the Google Apps Script deployment URL.', true);
+      });
     });
 
     miniEnvelope.addEventListener('click', openModal);

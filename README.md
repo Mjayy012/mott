@@ -54,23 +54,22 @@ Happy monthsary! ❤️
 
 ## Chapter Seven reply
 
-Chapter Seven fetches the shared envelope message from `replies.html`.
+Chapter Seven saves and loads the latest reply through Google Sheets.
 
-To show one message on all devices:
+1. Open your reply spreadsheet.
+2. Go to **Extensions > Apps Script**.
+3. Paste the code from `google-apps-script/Code.gs`.
+4. Click **Deploy > New deployment**.
+5. Choose **Web app**.
+6. Set **Execute as** to **Me**.
+7. Set **Who has access** to **Anyone**.
+8. Copy the Web App URL.
+9. Paste that URL into `assets/config.js`:
 
-1. Open `replies.html`.
-2. Put the message in the JSON block:
-
-```json
-{
-  "message": "Your reply here"
-}
+```js
+"GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
 ```
 
-3. Push the change to GitHub.
-
-After GitHub Pages updates, every device that opens `story.html` will fetch that
-same message and show it inside the Chapter Seven envelope.
-
-The form on `story.html` still saves locally for quick testing, but GitHub Pages
-cannot let a browser rewrite repo files automatically.
+The first sent reply creates/formats a `Replies` tab automatically, then stores
+the latest reply in row 2. Every device will load that same reply into the
+Chapter Seven envelope.
