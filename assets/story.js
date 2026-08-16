@@ -804,38 +804,44 @@
     function saveReplyToSheet(message){
       if(!GOOGLE_SCRIPT_URL) return Promise.reject(new Error('Google Script URL is missing.'));
 
-      return new Promise(function(resolve){
-        const iframeName = 'reply-save-frame-' + Date.now();
-        const iframe = document.createElement('iframe');
-        iframe.name = iframeName;
-        iframe.className = 'visually-hidden';
+      return new Promise(function(resolve, reject){
+        const callbackName = 'monthsaryReplySaveCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const script = document.createElement('script');
+        let finished = false;
+        const timeout = setTimeout(function(){
+          cleanup();
+          reject(new Error('Google Sheet reply save timed out.'));
+        }, 12000);
 
-        const formEl = document.createElement('form');
-        formEl.method = 'POST';
-        formEl.action = GOOGLE_SCRIPT_URL;
-        formEl.target = iframeName;
-        formEl.className = 'visually-hidden';
+        function cleanup(){
+          if(finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if(script.parentNode) script.parentNode.removeChild(script);
+        }
 
-        [
-          ['message', message],
-          ['page', window.location.pathname.split('/').pop() || 'story.html']
-        ].forEach(function(pair){
-          const field = document.createElement('input');
-          field.type = 'hidden';
-          field.name = pair[0];
-          field.value = pair[1];
-          formEl.appendChild(field);
+        window[callbackName] = function(data){
+          cleanup();
+          if(!data || !data.ok){
+            reject(new Error((data && data.error) || 'Could not save the reply.'));
+            return;
+          }
+          resolve(data.reply || { message: message });
+        };
+
+        script.onerror = function(){
+          cleanup();
+          reject(new Error('Could not reach the Google Sheet saver.'));
+        };
+        script.src = appendQuery(GOOGLE_SCRIPT_URL, {
+          action: 'save',
+          message: message,
+          page: window.location.pathname.split('/').pop() || 'story.html',
+          callback: callbackName,
+          v: Date.now()
         });
-
-        document.body.appendChild(iframe);
-        document.body.appendChild(formEl);
-        formEl.submit();
-
-        setTimeout(function(){
-          formEl.remove();
-          iframe.remove();
-          resolve();
-        }, 1800);
+        document.body.appendChild(script);
       });
     }
 
@@ -877,10 +883,8 @@
       }
 
       setStatus('Sending your letter...');
-      saveReplyToSheet(message).then(function(){
-        return loadReplyFromSheet();
-      }).then(function(savedMessage){
-        pageReplyMessage = savedMessage || message;
+      saveReplyToSheet(message).then(function(reply){
+        pageReplyMessage = reply && reply.message ? reply.message : message;
         showSentState(pageReplyMessage, 'page');
         setStatus('');
       }).catch(function(){

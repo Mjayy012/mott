@@ -1,6 +1,11 @@
 const SHEET_NAME = 'Replies';
 
 function doGet(e) {
+  const params = e && e.parameter ? e.parameter : {};
+  if (params.action === 'save') {
+    return saveReply_(e, params);
+  }
+
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   if (!sheet) {
     return output_(e, {
@@ -25,31 +30,34 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const sheet = getReplySheet_();
   const params = e && e.parameter ? e.parameter : {};
   const body = parseBody_(e);
-  const message = String(params.message || body.message || '').trim();
-  const page = String(params.page || body.page || 'story.html').trim();
+  return saveReply_(e, {
+    message: params.message || body.message || '',
+    page: params.page || body.page || 'story.html'
+  });
+}
+
+function saveReply_(e, params) {
+  const sheet = getReplySheet_();
+  const message = String(params.message || '').trim();
+  const page = String(params.page || 'story.html').trim();
 
   if (!message) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: false, error: 'Message is required.' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return output_(e, { ok: false, error: 'Message is required.' });
   }
 
   const now = new Date();
   sheet.getRange(2, 1, 1, 3).setValues([[now, message, page]]);
 
-  return ContentService
-    .createTextOutput(JSON.stringify({
-      ok: true,
-      reply: {
-        updatedAt: now.toISOString(),
-        message: message,
-        page: page
-      }
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return output_(e, {
+    ok: true,
+    reply: {
+      updatedAt: now.toISOString(),
+      message: message,
+      page: page
+    }
+  });
 }
 
 function getReplySheet_() {
