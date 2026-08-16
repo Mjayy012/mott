@@ -612,15 +612,120 @@
     10. LOVE LETTER
     ============================================================ */
   #letter{ background:linear-gradient(180deg, var(--blush), var(--cream-deep)); }
+  .letter-scene{
+    width:100%;
+    max-width:560px;
+    min-height:620px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    perspective:1200px;
+  }
+  .envelope-open{
+    position:relative;
+    width:min(430px, 90vw);
+    height:260px;
+    cursor:pointer;
+    border-radius:8px;
+    background:linear-gradient(145deg, #f7d8dc, #f0c2ca);
+    box-shadow:0 26px 54px -22px rgba(91,35,51,.45);
+    border:1px solid rgba(201,166,107,.35);
+    overflow:visible;
+    transition:transform .5s var(--ease), opacity .45s var(--ease);
+  }
+  .envelope-open::before,
+  .envelope-open::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    border-radius:8px;
+    pointer-events:none;
+  }
+  .envelope-open::before{
+    background:
+      linear-gradient(32deg, transparent 49.5%, rgba(255,253,251,.75) 50%, transparent 50.5%),
+      linear-gradient(-32deg, transparent 49.5%, rgba(255,253,251,.75) 50%, transparent 50.5%);
+    opacity:.75;
+  }
+  .envelope-open::after{
+    background:
+      linear-gradient(146deg, transparent 49.5%, rgba(201,166,107,.28) 50%, transparent 50.5%),
+      linear-gradient(-146deg, transparent 49.5%, rgba(201,166,107,.28) 50%, transparent 50.5%);
+  }
+  .envelope-flap{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:150px;
+    transform-origin:top center;
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    background:linear-gradient(180deg, #fff3f4, #e9aeb9);
+    border-radius:8px 8px 0 0;
+    box-shadow:0 14px 24px -18px rgba(91,35,51,.45);
+    transition:transform .8s var(--ease);
+    z-index:3;
+  }
+  .envelope-heart{
+    position:absolute;
+    left:50%;
+    top:118px;
+    transform:translate(-50%, -50%);
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg, var(--burgundy), var(--rose));
+    color:var(--white);
+    font-size:1.6rem;
+    box-shadow:0 12px 24px -12px rgba(91,35,51,.5);
+    z-index:4;
+    transition:transform .5s var(--ease), opacity .45s var(--ease);
+  }
+  .envelope-note{
+    position:absolute;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    width:86%;
+    text-align:center;
+    font-family:var(--script);
+    font-size:1.35rem;
+    color:var(--burgundy);
+    z-index:2;
+  }
+  .letter-open-btn{
+    padding:13px 28px;
+    border-radius:999px;
+    background:linear-gradient(135deg, var(--burgundy), var(--rose-deep));
+    color:var(--white);
+    box-shadow:0 14px 30px -16px rgba(91,35,51,.45);
+    letter-spacing:.04em;
+    transition:transform .3s var(--ease), box-shadow .3s var(--ease), opacity .4s var(--ease);
+  }
+  .letter-open-btn:hover,
+  .letter-open-btn:focus-visible{
+    transform:translateY(-2px);
+    box-shadow:0 18px 36px -16px rgba(91,35,51,.55);
+  }
   .letter-paper{
     width:100%; max-width:520px;
     background:
       repeating-linear-gradient(var(--white) 0 38px, rgba(201,166,107,.12) 39px),
       var(--white);
     border-radius:6px;
-    padding:44px 34px;
+    padding:0 34px;
     position:relative;
     box-shadow:0 24px 50px -20px rgba(91,35,51,.4), 0 0 0 1px rgba(201,166,107,.2);
+    opacity:0;
+    max-height:0;
+    overflow:hidden;
+    transform:translateY(36px) rotateX(8deg);
+    transition:opacity .7s var(--ease), transform .7s var(--ease), max-height .9s var(--ease);
   }
   .letter-paper::before{
     content:'❤'; position:absolute; top:16px; right:20px; font-size:1.1rem; color:var(--rose);
@@ -635,6 +740,35 @@
   }
   .letter-sign{
     margin-top:18px; font-family:var(--script); font-size:1.7rem; color:var(--rose-deep); text-align:right;
+  }
+  .letter-scene.opened .envelope-open{
+    transform:translateY(-18px) scale(.86);
+    opacity:.35;
+  }
+  .letter-scene.opened .envelope-flap{
+    transform:rotateX(180deg);
+  }
+  .letter-scene.opened .envelope-heart{
+    transform:translate(-50%, -50%) scale(.6);
+    opacity:0;
+  }
+  .letter-scene.opened .letter-open-btn{
+    opacity:0;
+    pointer-events:none;
+  }
+  .letter-scene.opened .letter-paper{
+    opacity:1;
+    max-height:900px;
+    padding:44px 34px;
+    overflow:visible;
+    transform:translateY(-34px) rotateX(0);
+  }
+  @media(max-width:540px){
+    .letter-scene{ min-height:660px; }
+    .envelope-open{ height:220px; }
+    .letter-paper{ padding:0 24px; }
+    .letter-scene.opened .letter-paper{ padding:38px 24px; }
+    .letter-body{ font-size:1.22rem; line-height:1.78; }
   }
 
   /* ============================================================
@@ -905,10 +1039,19 @@
       <p class="eyebrow reveal">Chapter Six</p>
       <h2 class="chapter-title reveal">A Letter For You 💌</h2>
 
-      <div class="letter-paper reveal">
-        <p class="letter-greeting">My love,</p>
-        <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
-        <p class="letter-sign">Always yours ❤️</p>
+      <div class="letter-scene reveal" id="letter-scene">
+        <button class="envelope-open" id="letter-envelope" type="button" aria-label="Open the letter">
+          <div class="envelope-flap"></div>
+          <div class="envelope-heart">❤️</div>
+          <div class="envelope-note">A letter sealed with all my love</div>
+        </button>
+        <button class="letter-open-btn" id="letter-open-btn" aria-expanded="false">Open the Letter 💌</button>
+
+        <div class="letter-paper" id="letter-paper">
+          <p class="letter-greeting">My love,</p>
+          <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
+          <p class="letter-sign">Always yours ❤️</p>
+        </div>
       </div>
     </section>
 
@@ -1029,6 +1172,17 @@
   document.getElementById('finale-names').textContent = YOUR_NAME + " ❤️ " + PARTNER_NAME;
   document.getElementById('letter-body').textContent = loveLetter;
   document.getElementById('surprise-message').textContent = secretMessage;
+
+  const letterScene = document.getElementById('letter-scene');
+  const letterPaper = document.getElementById('letter-paper');
+  function openLetter(){
+    if(!letterScene || letterScene.classList.contains('opened')) return;
+    letterScene.classList.add('opened');
+    document.getElementById('letter-open-btn').setAttribute('aria-expanded', 'true');
+    setTimeout(function(){ letterPaper.scrollIntoView({ behavior:'smooth', block:'center' }); }, 450);
+  }
+  document.getElementById('letter-envelope').addEventListener('click', openLetter);
+  document.getElementById('letter-open-btn').addEventListener('click', openLetter);
 
   /* ---------------- timeline ---------------- */
   const timelineEl = document.getElementById('timeline');
