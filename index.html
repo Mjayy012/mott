@@ -527,16 +527,16 @@
     ============================================================ */
   #videos{ background:linear-gradient(180deg, var(--burgundy-deep), var(--cream-deep) 18%, var(--cream)); }
   .video-stage{
-    width:100%; max-width:520px;
+    width:min(92vw, 920px);
     border-radius:22px; overflow:hidden; position:relative;
     box-shadow:0 30px 60px -22px rgba(52,16,25,.5), 0 0 0 1px rgba(201,166,107,.3);
     background:#1b0d12;
   }
   .video-frame{ display:none; }
   .video-frame.active{ display:block; }
-  .video-frame video{ width:100%; display:block; aspect-ratio:9/16; object-fit:cover; background:#1b0d12; }
+  .video-frame video{ width:100%; display:block; aspect-ratio:7/3; object-fit:contain; background:#1b0d12; }
   .video-placeholder{
-    aspect-ratio:9/16; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    aspect-ratio:7/3; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:10px; color:var(--gold-soft); background:linear-gradient(160deg,#3d1622,#1b0d12);
     font-size:.85rem; text-align:center; padding:20px;
   }
@@ -554,6 +554,11 @@
   }
   .video-controls button:hover{ background:rgba(255,255,255,.14); }
   .video-counter{ color:var(--gold-soft); font-size:.78rem; opacity:.8; margin-left:auto; }
+  @media(max-width:720px){
+    .video-stage{ width:94vw; border-radius:16px; }
+    .video-frame video,
+    .video-placeholder{ aspect-ratio:7/3; }
+  }
   .video-next-btn{
     margin-top:16px; padding:11px 26px; border-radius:999px;
     background:rgba(91,35,51,.9); color:var(--white); font-size:.85rem;
