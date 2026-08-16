@@ -54,15 +54,23 @@ Happy monthsary! ❤️
 
 ## Chapter Seven reply
 
-The "Write Me Back" form tries to save the latest letter through `api/replies.php`.
-On a PHP-capable host, the reply is written to:
+Chapter Seven fetches the shared envelope message from `replies.html`.
 
+To show one message on all devices:
+
+1. Open `replies.html`.
+2. Put the message in the JSON block:
+
+```json
+{
+  "message": "Your reply here"
+}
 ```
-data/reply.json
-```
 
-There is only one saved message. If the form is submitted again, the JSON file is
-overwritten with the newest letter.
+3. Push the change to GitHub.
 
-Static hosts like GitHub Pages do not run PHP, so they cannot save to JSON on the
-server. In that case the form falls back to saving only in the visitor's browser.
+After GitHub Pages updates, every device that opens `story.html` will fetch that
+same message and show it inside the Chapter Seven envelope.
+
+The form on `story.html` still saves locally for quick testing, but GitHub Pages
+cannot let a browser rewrite repo files automatically.
