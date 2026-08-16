@@ -718,7 +718,13 @@
     const modalEnvelope = document.getElementById('reply-modal-envelope');
     const modalText = document.getElementById('reply-modal-text');
     const input = document.getElementById('reply-input');
+    const status = document.getElementById('reply-status');
+    const submitBtn = form.querySelector('.reply-submit-btn');
+    const submitDefaultText = submitBtn ? submitBtn.textContent : 'Send It';
+    const sentText = sentBox.querySelector('.reply-sent-text');
     const storageKey = 'monthsary_reply_message';
+    const savedOnlineKey = 'monthsary_reply_saved_online';
+    const apiUrl = 'api/replies.php';
 
     if(!form || !sentBox || !miniEnvelope || !editBtn || !overlay || !modalClose || !modalScene || !modalEnvelope || !modalText || !input) return;
 
@@ -727,22 +733,60 @@
       catch(e){ return ''; }
     }
 
-    function storeReply(message){
-      try{ localStorage.setItem(storageKey, message); }
+    function wasSavedOnline(){
+      try{ return localStorage.getItem(savedOnlineKey) === 'yes'; }
+      catch(e){ return false; }
+    }
+
+    function storeReply(message, savedOnline){
+      try{
+        localStorage.setItem(storageKey, message);
+        localStorage.setItem(savedOnlineKey, savedOnline ? 'yes' : 'no');
+      }
       catch(e){}
     }
 
-    function showSentState(message){
+    function setStatus(message, isError){
+      if(!status) return;
+      status.textContent = message || '';
+      status.classList.toggle('error', !!isError);
+    }
+
+    function showSentState(message, saveMode){
       form.classList.add('hidden');
       sentBox.classList.remove('hidden');
       modalText.textContent = message;
+      if(sentText){
+        sentText.textContent = saveMode === 'local'
+          ? 'Your letter was saved on this device only.'
+          : 'Your letter has been sent and saved.';
+      }
     }
 
     function showFormState(message){
       sentBox.classList.add('hidden');
       form.classList.remove('hidden');
+      setStatus('');
       input.value = message || '';
       input.focus();
+    }
+
+    function saveReplyOnline(message){
+      return fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          page: window.location.pathname.split('/').pop() || 'story.html'
+        })
+      }).then(function(response){
+        return response.json().catch(function(){ return {}; }).then(function(data){
+          if(!response.ok || !data.ok){
+            throw new Error(data.error || 'Could not save online.');
+          }
+          return data.reply || {};
+        });
+      });
     }
 
     function openModal(){
@@ -765,14 +809,32 @@
     }
 
     const existing = getStoredReply();
-    if(existing) showSentState(existing);
+    if(existing) showSentState(existing, wasSavedOnline() ? 'online' : 'local');
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
       const message = input.value.trim();
       if(!message) return;
-      storeReply(message);
-      showSentState(message);
+      if(submitBtn){
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+      }
+      setStatus('Saving your letter...');
+
+      saveReplyOnline(message).then(function(reply){
+        storeReply(reply.message || message, true);
+        setStatus('');
+        showSentState(message, 'online');
+      }).catch(function(){
+        storeReply(message, false);
+        setStatus('Saved on this device only. Upload to a PHP host to save online.', true);
+        showSentState(message, 'local');
+      }).finally(function(){
+        if(submitBtn){
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitDefaultText;
+        }
+      });
     });
 
     miniEnvelope.addEventListener('click', openModal);

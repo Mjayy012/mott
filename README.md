@@ -51,3 +51,18 @@ Vercel, or GitHub Pages, and send your partner the link. The password screen kee
 the surprise safe until they enter the code.
 
 Happy monthsary! ❤️
+
+## Chapter Seven reply
+
+The "Write Me Back" form tries to save the latest letter through `api/replies.php`.
+On a PHP-capable host, the reply is written to:
+
+```
+data/reply.json
+```
+
+There is only one saved message. If the form is submitted again, the JSON file is
+overwritten with the newest letter.
+
+Static hosts like GitHub Pages do not run PHP, so they cannot save to JSON on the
+server. In that case the form falls back to saving only in the visitor's browser.
