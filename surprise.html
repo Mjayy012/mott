@@ -770,6 +770,112 @@
     .letter-scene.opened .letter-paper{ padding:38px 24px; }
     .letter-body{ font-size:1.22rem; line-height:1.78; }
   }
+  .envelope-stack{
+    position:relative;
+    width:min(430px, 90vw);
+    height:260px;
+    margin-top:250px;
+    cursor:pointer;
+    outline:none;
+    overflow:visible;
+  }
+  .envelope-stack:focus-visible{
+    filter:drop-shadow(0 0 0.5rem rgba(201,166,107,.75));
+  }
+  .envelope-back,
+  .envelope-front,
+  .envelope-flap{
+    position:absolute;
+    left:0;
+    width:100%;
+    border-radius:8px;
+  }
+  .envelope-back{
+    top:0;
+    height:100%;
+    background:linear-gradient(145deg, #f7d8dc, #f0c2ca);
+    border:1px solid rgba(201,166,107,.35);
+    box-shadow:0 26px 54px -22px rgba(91,35,51,.45);
+    z-index:1;
+  }
+  .envelope-front{
+    bottom:0;
+    height:78%;
+    background:
+      linear-gradient(32deg, transparent 49.5%, rgba(255,253,251,.72) 50%, transparent 50.5%),
+      linear-gradient(-32deg, transparent 49.5%, rgba(255,253,251,.72) 50%, transparent 50.5%),
+      linear-gradient(145deg, #f6cfd5, #e9aeb9);
+    border:1px solid rgba(201,166,107,.25);
+    box-shadow:inset 0 18px 30px rgba(255,253,251,.22);
+    z-index:3;
+  }
+  .envelope-stack .envelope-flap{
+    top:0;
+    height:158px;
+    transform-origin:top center;
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    background:linear-gradient(180deg, #fff3f4, #e9aeb9);
+    box-shadow:0 14px 24px -18px rgba(91,35,51,.45);
+    transition:transform .85s var(--ease), z-index .2s linear .3s;
+    z-index:5;
+  }
+  .envelope-stack .envelope-heart{
+    top:122px;
+    z-index:6;
+  }
+  .envelope-stack .envelope-note{
+    bottom:20px;
+    z-index:4;
+  }
+  .envelope-stack .letter-paper{
+    position:absolute;
+    left:50%;
+    top:28px;
+    width:84%;
+    max-width:none;
+    padding:30px 28px;
+    max-height:none;
+    opacity:0;
+    overflow:hidden;
+    transform:translate(-50%, 130px) scale(.72);
+    transform-origin:center bottom;
+    transition:opacity .35s var(--ease), transform 1s var(--ease);
+    z-index:2;
+    pointer-events:none;
+  }
+  .letter-scene.opened .envelope-stack .letter-paper{
+    opacity:1;
+    max-height:none;
+    padding:30px 28px;
+    overflow:visible;
+    transform:translate(-50%, -245px) scale(.92);
+  }
+  .letter-scene.opened .envelope-stack .envelope-flap{
+    transform:rotateX(180deg);
+    z-index:1;
+  }
+  .letter-scene.opened .envelope-stack .envelope-heart{
+    transform:translate(-50%, -50%) scale(.55);
+    opacity:0;
+  }
+  .letter-scene.opened .envelope-stack{
+    cursor:default;
+  }
+  @media(max-width:540px){
+    .envelope-stack{
+      height:220px;
+      margin-top:230px;
+    }
+    .envelope-stack .letter-paper{
+      width:88%;
+      padding:24px 20px;
+      transform:translate(-50%, 115px) scale(.7);
+    }
+    .letter-scene.opened .envelope-stack .letter-paper{
+      padding:24px 20px;
+      transform:translate(-50%, -225px) scale(.9);
+    }
+  }
 
   /* ============================================================
     11. A QUIET MOMENT
@@ -1040,18 +1146,20 @@
       <h2 class="chapter-title reveal">A Letter For You 💌</h2>
 
       <div class="letter-scene reveal" id="letter-scene">
-        <button class="envelope-open" id="letter-envelope" type="button" aria-label="Open the letter">
+        <div class="envelope-stack" id="letter-envelope" role="button" tabindex="0" aria-label="Open the letter">
+          <div class="envelope-back"></div>
+          <div class="letter-paper" id="letter-paper">
+            <p class="letter-greeting">My love,</p>
+            <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
+            <p class="letter-sign">Always yours ❤️</p>
+          </div>
+          <div class="envelope-front">
+            <div class="envelope-note">A letter sealed with all my love</div>
+          </div>
           <div class="envelope-flap"></div>
           <div class="envelope-heart">❤️</div>
-          <div class="envelope-note">A letter sealed with all my love</div>
-        </button>
-        <button class="letter-open-btn" id="letter-open-btn" aria-expanded="false">Open the Letter 💌</button>
-
-        <div class="letter-paper" id="letter-paper">
-          <p class="letter-greeting">My love,</p>
-          <p class="letter-body" id="letter-body">It's been a month since we started this journey together, and every day I realize how much I cherish you. You make even the simplest moments feel special, and I can't wait to see where our story takes us next. You know how much I love you. You're the best thing that ever happened to me. Sometimes it feels like I'm dreaming every day because I got you. I already told you that you're the girl I've been dreaming about, and now I still can't believe that I actually have you in my life. sheeeeesh! hahahah (katam-is kaayo oy!).</p>
-          <p class="letter-sign">Always yours ❤️</p>
         </div>
+        <button class="letter-open-btn" id="letter-open-btn" aria-expanded="false">Open the Letter 💌</button>
       </div>
     </section>
 
@@ -1179,9 +1287,15 @@
     if(!letterScene || letterScene.classList.contains('opened')) return;
     letterScene.classList.add('opened');
     document.getElementById('letter-open-btn').setAttribute('aria-expanded', 'true');
-    setTimeout(function(){ letterPaper.scrollIntoView({ behavior:'smooth', block:'center' }); }, 450);
+    setTimeout(function(){ letterScene.scrollIntoView({ behavior:'smooth', block:'center' }); }, 450);
   }
   document.getElementById('letter-envelope').addEventListener('click', openLetter);
+  document.getElementById('letter-envelope').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      openLetter();
+    }
+  });
   document.getElementById('letter-open-btn').addEventListener('click', openLetter);
 
   /* ---------------- timeline ---------------- */
