@@ -1109,6 +1109,7 @@
 
     setTimeout(function(){
       sessionStorage.setItem('monthsaryUnlocked', 'yes');
+      sessionStorage.setItem('monthsaryAutoplayMusic', 'yes');
       window.location.href = 'surprise.html';
     }, 2200);
   }
@@ -1242,8 +1243,60 @@
     musicControl.style.display = 'none';
   }
 
+  let musicResumeQueued = false;
+
+  function setMusicPlayingState(isPlaying){
+    musicControl.classList.toggle('playing', isPlaying);
+    musicToggle.textContent = isPlaying ? '♪' : '❚❚';
+  }
+
+  function playMusicSafely(){
+    if(!musicEnabled) return Promise.resolve(false);
+    bgAudio.muted = false;
+    muteToggle.textContent = '🔊';
+
+    const p = bgAudio.play();
+    if(p && p.then){
+      return p.then(function(){
+        setMusicPlayingState(true);
+        return true;
+      }).catch(function(){
+        setMusicPlayingState(false);
+        queueMusicResume();
+        return false;
+      });
+    }
+
+    setMusicPlayingState(true);
+    return Promise.resolve(true);
+  }
+
+  function queueMusicResume(){
+    if(musicResumeQueued || !musicEnabled) return;
+    musicResumeQueued = true;
+
+    const resume = function(){
+      musicResumeQueued = false;
+      document.removeEventListener('pointerdown', resume);
+      document.removeEventListener('touchstart', resume);
+      document.removeEventListener('click', resume);
+      document.removeEventListener('keydown', resume);
+      playMusicSafely();
+    };
+
+    document.addEventListener('pointerdown', resume, { once:true });
+    document.addEventListener('touchstart', resume, { once:true });
+    document.addEventListener('click', resume, { once:true });
+    document.addEventListener('keydown', resume, { once:true });
+  }
+
   function attemptAutoplayMusic(){
     if(!musicEnabled) return;
+    playMusicSafely();
+    bgAudio.addEventListener('canplay', function(){
+      if(bgAudio.paused) playMusicSafely();
+    }, { once:true });
+    return;
     const p = bgAudio.play();
     if(p && p.then){
       p.then(function(){ musicControl.classList.add('playing'); })
@@ -1262,13 +1315,10 @@
   musicToggle.addEventListener('click', function(){
     if(!musicEnabled) return;
     if(bgAudio.paused){
-      bgAudio.play().catch(function(){});
-      musicControl.classList.add('playing');
-      musicToggle.textContent = '♪';
+      playMusicSafely();
     } else {
       bgAudio.pause();
-      musicControl.classList.remove('playing');
-      musicToggle.textContent = '❚❚';
+      setMusicPlayingState(false);
     }
     musicControl.classList.toggle('tucked');
   });
@@ -1302,8 +1352,7 @@
   function pauseMusicForVideo(){
     if(!musicEnabled || bgAudio.paused) return;
     bgAudio.pause();
-    musicControl.classList.remove('playing');
-    musicToggle.textContent = '♪';
+    setMusicPlayingState(false);
   }
 
   /* ============================================================
