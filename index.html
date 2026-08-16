@@ -1289,6 +1289,13 @@
     requestAnimationFrame(step);
   }
 
+  function pauseMusicForVideo(){
+    if(!musicEnabled || bgAudio.paused) return;
+    bgAudio.pause();
+    musicControl.classList.remove('playing');
+    musicToggle.textContent = '♪';
+  }
+
   /* ============================================================
     5. CINEMATIC PHOTO SLIDESHOW
     ============================================================ */
@@ -1435,6 +1442,7 @@
       vid.muted = true; // respect autoplay restrictions until user interacts
       vid.controls = false;
       vid.preload = 'metadata';
+      vid.addEventListener('play', pauseMusicForVideo);
       vid.onerror = function(){
         frame.innerHTML = '<div class="video-placeholder"><span style="font-size:2rem;">🎬</span><span>Add ' + v.src + ' to see this memory</span></div>' +
           '<p class="video-caption">' + escapeHtml(v.caption || '') + '</p>';
@@ -1460,6 +1468,7 @@
       const v = currentVideoEl();
       if(!v) return;
       if(v.paused){
+        pauseMusicForVideo();
         v.muted = false;
         v.play().catch(function(){});
         this.textContent = '❚❚';
