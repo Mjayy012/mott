@@ -1549,10 +1549,13 @@
       document.body.classList.add('story-opening');
       sessionStorage.setItem('monthsaryUnlocked', 'yes');
       sessionStorage.setItem('monthsaryAutoplayMusic', 'yes');
-      playMusicSafely();
-      setTimeout(function(){
+
+      const goToStory = function(){
         window.location.href = 'story.html';
-      }, 520);
+      };
+      playMusicSafely().finally(function(){
+        setTimeout(goToStory, 180);
+      });
       return;
     }
     document.getElementById('story').scrollIntoView({ behavior:'smooth' });
@@ -1573,6 +1576,7 @@
 
   if(musicEnabled){
     bgAudio.src = BACKGROUND_MUSIC;
+    bgAudio.preload = 'auto';
     bgAudio.volume = 0.5;
   } else {
     musicControl.style.display = 'none';
@@ -1685,6 +1689,8 @@
   }
 
   let musicPausedByVideo = false;
+  let driveMusicSilenced = false;
+  let driveMusicVolumeBeforeSilence = 0.5;
 
   function pauseMusicForVideo(){
     if(!musicEnabled || bgAudio.paused) return;
@@ -1697,6 +1703,23 @@
     if(!musicEnabled || !musicPausedByVideo) return;
     musicPausedByVideo = false;
     playMusicSafely();
+  }
+
+  function silenceMusicForDriveVideo(){
+    if(!musicEnabled || driveMusicSilenced || bgAudio.paused) return;
+    driveMusicSilenced = true;
+    driveMusicVolumeBeforeSilence = bgAudio.volume || parseFloat(volumeSlider.value) || 0.5;
+    fadeMusic(0, 220);
+  }
+
+  function restoreMusicAfterDriveVideo(){
+    if(!musicEnabled || !driveMusicSilenced) return;
+    driveMusicSilenced = false;
+    bgAudio.muted = false;
+    muteToggle.textContent = '🔊';
+    const targetVolume = parseFloat(volumeSlider.value) || driveMusicVolumeBeforeSilence || 0.5;
+    fadeMusic(targetVolume, 520);
+    setMusicPlayingState(!bgAudio.paused);
   }
 
   function pauseCurrentVideoForScroll(){
@@ -1936,9 +1959,9 @@
           const activeVideo = videos[currentVideo] || {};
           if(activeVideo.type === 'drive'){
             if(entry.isIntersecting && entry.intersectionRatio >= 0.12){
-              pauseMusicForVideo();
+              silenceMusicForDriveVideo();
             } else {
-              resumeMusicAfterVideo();
+              restoreMusicAfterDriveVideo();
             }
             return;
           }
