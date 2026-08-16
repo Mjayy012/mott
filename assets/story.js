@@ -137,6 +137,9 @@
   const muteToggle = document.getElementById('mute-toggle');
   const volumeSlider = document.getElementById('volume-slider');
   let musicEnabled = !!BACKGROUND_MUSIC;
+  const MUSIC_TIME_KEY = 'monthsaryMusicTime';
+  const MUSIC_SHOULD_PLAY_KEY = 'monthsaryMusicShouldPlay';
+  let musicTimeRestored = false;
 
   if(musicEnabled){
     bgAudio.src = BACKGROUND_MUSIC;
@@ -153,8 +156,47 @@
     musicToggle.textContent = isPlaying ? '♪' : '❚❚';
   }
 
+  function getSavedMusicTime(){
+    const saved = parseFloat(sessionStorage.getItem(MUSIC_TIME_KEY));
+    return Number.isFinite(saved) && saved > 0 ? saved : 0;
+  }
+
+  function restoreSavedMusicTime(){
+    if(!musicEnabled || musicTimeRestored) return;
+    const saved = getSavedMusicTime();
+    if(!saved){
+      musicTimeRestored = true;
+      return;
+    }
+
+    const applySavedTime = function(){
+      try{
+        if(Number.isFinite(bgAudio.duration) && bgAudio.duration > 0){
+          bgAudio.currentTime = Math.min(saved, Math.max(0, bgAudio.duration - 0.25));
+        } else {
+          bgAudio.currentTime = saved;
+        }
+        musicTimeRestored = true;
+      }catch(e){
+        bgAudio.addEventListener('loadedmetadata', applySavedTime, { once:true });
+      }
+    };
+
+    applySavedTime();
+  }
+
+  function saveMusicState(shouldPlay){
+    if(!musicEnabled) return;
+    if(Number.isFinite(bgAudio.currentTime)){
+      sessionStorage.setItem(MUSIC_TIME_KEY, String(bgAudio.currentTime));
+    }
+    sessionStorage.setItem(MUSIC_SHOULD_PLAY_KEY, shouldPlay ? 'yes' : 'no');
+  }
+
   function playMusicSafely(){
     if(!musicEnabled) return Promise.resolve(false);
+    restoreSavedMusicTime();
+    sessionStorage.setItem(MUSIC_SHOULD_PLAY_KEY, 'yes');
     bgAudio.muted = false;
     muteToggle.textContent = '🔊';
 
@@ -162,6 +204,7 @@
     if(p && p.then){
       return p.then(function(){
         setMusicPlayingState(true);
+        saveMusicState(true);
         return true;
       }).catch(function(){
         setMusicPlayingState(false);
@@ -171,6 +214,7 @@
     }
 
     setMusicPlayingState(true);
+    saveMusicState(true);
     return Promise.resolve(true);
   }
 
@@ -195,9 +239,13 @@
 
   function attemptAutoplayMusic(){
     if(!musicEnabled) return;
-    playMusicSafely();
+    restoreSavedMusicTime();
+    const shouldPlay = sessionStorage.getItem(MUSIC_SHOULD_PLAY_KEY);
+    if(shouldPlay !== 'no'){
+      playMusicSafely();
+    }
     bgAudio.addEventListener('canplay', function(){
-      if(bgAudio.paused) playMusicSafely();
+      if(bgAudio.paused && sessionStorage.getItem(MUSIC_SHOULD_PLAY_KEY) !== 'no') playMusicSafely();
     }, { once:true });
     return;
     const p = bgAudio.play();
@@ -220,10 +268,18 @@
     if(bgAudio.paused){
       playMusicSafely();
     } else {
+      saveMusicState(false);
       bgAudio.pause();
       setMusicPlayingState(false);
     }
     musicControl.classList.toggle('tucked');
+  });
+
+  bgAudio.addEventListener('timeupdate', function(){
+    saveMusicState(!bgAudio.paused || musicPausedByVideo);
+  });
+  window.addEventListener('pagehide', function(){
+    saveMusicState(!bgAudio.paused || musicPausedByVideo);
   });
 
   muteToggle.addEventListener('click', function(e){
@@ -257,6 +313,7 @@
   function pauseMusicForVideo(){
     if(!musicEnabled || bgAudio.paused) return;
     musicPausedByVideo = true;
+    saveMusicState(true);
     bgAudio.pause();
     setMusicPlayingState(false);
   }
@@ -625,6 +682,8 @@
   document.getElementById('replay-btn').addEventListener('click', function(){
     if(musicEnabled){ bgAudio.pause(); }
     sessionStorage.removeItem('monthsaryUnlocked');
+    sessionStorage.removeItem(MUSIC_TIME_KEY);
+    sessionStorage.removeItem(MUSIC_SHOULD_PLAY_KEY);
     window.location.href = 'index.html';
   });
 
