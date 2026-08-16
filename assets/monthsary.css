@@ -619,7 +619,7 @@
   #letter{ background:linear-gradient(180deg, var(--blush), var(--cream-deep)); }
   .letter-scene{
     width:100%;
-    max-width:600px;
+    max-width:min(88vw, 780px);
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -632,7 +632,7 @@
     display:flex;
     justify-content:center;
     overflow:hidden;
-    max-height:400px;
+    max-height:470px;
     opacity:1;
     margin-bottom:4px;
     transition:max-height .9s var(--ease) .55s, opacity .6s var(--ease) .55s, margin-bottom .9s var(--ease) .55s;
@@ -645,8 +645,8 @@
   }
   .envelope-stack{
     position:relative;
-    width:min(480px, 92vw);
-    height:300px;
+    width:min(700px, 92vw);
+    height:380px;
     flex-shrink:0;
     cursor:pointer;
     outline:none;
@@ -686,7 +686,7 @@
   }
   .envelope-flap{
     top:0;
-    height:182px;
+    height:232px;
     transform-origin:top center;
     clip-path:polygon(0 0, 100% 0, 50% 100%);
     background:linear-gradient(180deg, #fff3f4, #e9aeb9);
@@ -697,10 +697,10 @@
   .envelope-heart{
     position:absolute;
     left:50%;
-    top:142px;
+    top:180px;
     transform:translate(-50%, -50%);
-    width:64px;
-    height:64px;
+    width:70px;
+    height:70px;
     border-radius:50%;
     display:flex;
     align-items:center;
@@ -715,12 +715,12 @@
   .envelope-note{
     position:absolute;
     left:50%;
-    bottom:22px;
+    bottom:30px;
     transform:translateX(-50%);
     width:86%;
     text-align:center;
     font-family:var(--script);
-    font-size:1.4rem;
+    font-size:1.55rem;
     color:var(--burgundy);
     z-index:4;
   }
@@ -767,12 +767,12 @@
   /* --- the letter paper: a normal, full-size block that appears below the envelope --- */
   .letter-paper{
     width:100%;
-    max-width:580px;
+    max-width:760px;
     background:
       repeating-linear-gradient(var(--white) 0 40px, rgba(201,166,107,.12) 41px),
       var(--white);
     border-radius:16px;
-    padding:0 36px;
+    padding:0 48px;
     position:relative;
     box-shadow:0 24px 50px -20px rgba(91,35,51,.4), 0 0 0 1px rgba(201,166,107,.2);
     opacity:0;
@@ -798,10 +798,11 @@
   .letter-scene.opened .letter-paper{
     opacity:1;
     max-height:2000px;
-    padding:46px 36px;
+    padding:52px 48px;
     overflow:visible;
   }
   @media(max-width:540px){
+    .letter-scene{ max-width:94vw; }
     .envelope-stack{ height:250px; }
     .envelope-flap{ height:152px; }
     .envelope-heart{ top:118px; width:54px; height:54px; font-size:1.4rem; }
