@@ -5,7 +5,7 @@ window.MONTHSARY = {
   "MONTHSARY_NUMBER": "2",
   "RELATIONSHIP_START_DATE": "2026-06-10",
   "BACKGROUND_MUSIC": "music/theme-song.mp3",
-  "GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbxEN91npfzGvU5WlYi0LaXs2HINDVFEFK1QTjJXo5EYjVB2sHyLi5YsVp7m20nIyYw/exec",
+  "GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbxKJUcP5bqqPah7kjJKng4ZUDqPYOTRUtTRAavRbea13S_BjSqOvG6V84Okdw2G0hA/exec",
   "timelineEntries": [
     {
       "date": "Aug 2021",
