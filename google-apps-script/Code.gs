@@ -1,5 +1,6 @@
 const SHEET_NAME = 'Replies';
 const SPREADSHEET_ID = '1uWD22Vt0hyEDZziK53ISgcP2qBjnswyCTgRdffpydSo';
+const TARGET_SHEET_ID = 1409516766;
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
@@ -11,17 +12,7 @@ function doGet(e) {
     return saveReply_(e, params);
   }
 
-  const sheet = openSpreadsheet_().getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    return output_(e, {
-      ok: true,
-      reply: {
-        updatedAt: '',
-        message: '',
-        page: ''
-      }
-    });
-  }
+  const sheet = getReplySheet_();
 
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) {
@@ -80,7 +71,7 @@ function saveReply_(e, params) {
 
 function getReplySheet_() {
   const spreadsheet = openSpreadsheet_();
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  let sheet = findReplySheet_(spreadsheet);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
   }
@@ -95,6 +86,19 @@ function getReplySheet_() {
   return sheet;
 }
 
+function findReplySheet_(spreadsheet) {
+  const sheets = spreadsheet.getSheets();
+  const targetSheetId = Number(TARGET_SHEET_ID);
+
+  for (let i = 0; i < sheets.length; i += 1) {
+    if (sheets[i].getSheetId() === targetSheetId) {
+      return sheets[i];
+    }
+  }
+
+  return spreadsheet.getSheetByName(SHEET_NAME) || sheets[0] || null;
+}
+
 function openSpreadsheet_() {
   if (SPREADSHEET_ID) {
     return SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -105,14 +109,26 @@ function openSpreadsheet_() {
 
 function healthCheck_(e) {
   const spreadsheet = openSpreadsheet_();
-  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  const sheet = findReplySheet_(spreadsheet);
+  const sheets = spreadsheet.getSheets().map(function(currentSheet) {
+    return {
+      name: currentSheet.getName(),
+      sheetId: currentSheet.getSheetId(),
+      lastRow: currentSheet.getLastRow()
+    };
+  });
+
   return output_(e, {
     ok: true,
     spreadsheetId: spreadsheet.getId(),
     spreadsheetUrl: spreadsheet.getUrl(),
-    sheetName: SHEET_NAME,
+    configuredSheetName: SHEET_NAME,
+    targetSheetId: TARGET_SHEET_ID,
+    activeWriteSheetName: sheet ? sheet.getName() : '',
+    activeWriteSheetId: sheet ? sheet.getSheetId() : '',
     sheetExists: !!sheet,
-    lastRow: sheet ? sheet.getLastRow() : 0
+    lastRow: sheet ? sheet.getLastRow() : 0,
+    sheets: sheets
   });
 }
 
