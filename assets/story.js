@@ -887,8 +887,9 @@
         pageReplyMessage = reply && reply.message ? reply.message : message;
         showSentState(pageReplyMessage, 'page');
         setStatus('');
-      }).catch(function(){
-        setStatus('Could not save yet. Check the Google Apps Script deployment URL.', true);
+      }).catch(function(error){
+        const detail = error && error.message ? ' ' + error.message : '';
+        setStatus('Could not save yet.' + detail, true);
       });
     });
 

@@ -70,6 +70,6 @@ Chapter Seven saves and loads the latest reply through Google Sheets.
 "GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
 ```
 
-The first sent reply creates/formats a `Replies` tab automatically, then stores
-the latest reply in row 2. Every device will load that same reply into the
-Chapter Seven envelope.
+The first sent reply creates/formats a `Replies` tab automatically, then appends
+each new reply as a new row. Every device will load the newest saved reply into
+the Chapter Seven envelope.

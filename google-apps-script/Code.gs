@@ -1,12 +1,17 @@
 const SHEET_NAME = 'Replies';
+const SPREADSHEET_ID = '1uWD22Vt0hyEDZziK53ISgcP2qBjnswyCTgRdffpydSo';
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
+  if (params.action === 'health') {
+    return healthCheck_(e);
+  }
+
   if (params.action === 'save') {
     return saveReply_(e, params);
   }
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  const sheet = openSpreadsheet_().getSheetByName(SHEET_NAME);
   if (!sheet) {
     return output_(e, {
       ok: true,
@@ -18,7 +23,19 @@ function doGet(e) {
     });
   }
 
-  const values = sheet.getRange(2, 1, 1, 3).getValues()[0];
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    return output_(e, {
+      ok: true,
+      reply: {
+        updatedAt: '',
+        message: '',
+        page: ''
+      }
+    });
+  }
+
+  const values = sheet.getRange(lastRow, 1, 1, 3).getValues()[0];
   return output_(e, {
     ok: true,
     reply: {
@@ -48,7 +65,8 @@ function saveReply_(e, params) {
   }
 
   const now = new Date();
-  sheet.getRange(2, 1, 1, 3).setValues([[now, message, page]]);
+  sheet.appendRow([now, message, page]);
+  sheet.autoResizeColumns(1, 3);
 
   return output_(e, {
     ok: true,
@@ -61,7 +79,7 @@ function saveReply_(e, params) {
 }
 
 function getReplySheet_() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const spreadsheet = openSpreadsheet_();
   let sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
@@ -75,6 +93,27 @@ function getReplySheet_() {
   }
 
   return sheet;
+}
+
+function openSpreadsheet_() {
+  if (SPREADSHEET_ID) {
+    return SpreadsheetApp.openById(SPREADSHEET_ID);
+  }
+
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function healthCheck_(e) {
+  const spreadsheet = openSpreadsheet_();
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  return output_(e, {
+    ok: true,
+    spreadsheetId: spreadsheet.getId(),
+    spreadsheetUrl: spreadsheet.getUrl(),
+    sheetName: SHEET_NAME,
+    sheetExists: !!sheet,
+    lastRow: sheet ? sheet.getLastRow() : 0
+  });
 }
 
 function parseBody_(e) {
